@@ -262,6 +262,128 @@ fi
 
 rm -rf "$TMPDIR"
 
+# === Ripple check: regex-special chars in basename (grep -Fv validation) ===
+echo ""
+echo "--- ripple-check.sh: regex-special chars in basename ---"
+
+TMPDIR_RC=$(mktemp -d)
+mkdir -p "$TMPDIR_RC/src"
+
+# WHY: dots in basename like "app.test.tsx" were previously treated as regex wildcards
+# by grep -v, matching unrelated files (e.g., "app_test_tsx"). grep -Fv treats dots literally.
+cat > "$TMPDIR_RC/src/app.test.tsx" << 'TSEOF'
+export function calculateTaxForTest(income: number): number {
+  return income * 0.33;
+}
+TSEOF
+
+# WHY: this caller file has a different basename — grep -Fv must NOT filter it out.
+# With old grep -v, "app.test.tsx" as regex matched "app_test_tsx" (dots = any char).
+cat > "$TMPDIR_RC/src/app_test_tsx_caller.ts" << 'TSEOF'
+import { calculateTaxForTest } from './app.test';
+const result = calculateTaxForTest(1000);
+TSEOF
+
+STDERR_RC=$(echo "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$TMPDIR_RC/src/app.test.tsx\"}}" | (cd "$TMPDIR_RC" && bash "$HOOKS_DIR/ripple-check.sh") 2>&1 >/dev/null)
+if echo "$STDERR_RC" | grep -q "calculateTaxForTest"; then
+  echo "  PASS: regex-special basename (app.test.tsx) — callers found via grep -Fv"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: grep -Fv should find callers despite dots in basename"
+  FAIL=$((FAIL + 1))
+fi
+
+rm -rf "$TMPDIR_RC"
+
+# === Ripple check: MAX_WARNINGS limit ===
+echo ""
+echo "--- ripple-check.sh: MAX_WARNINGS=5 limit ---"
+
+TMPDIR_MW=$(mktemp -d)
+mkdir -p "$TMPDIR_MW/src"
+
+# WHY: create a file with >5 exported functions, all used elsewhere.
+# The hook should cap warnings at MAX_WARNINGS=5.
+cat > "$TMPDIR_MW/src/many_exports.py" << 'PYEOF'
+def function_alpha():
+    pass
+def function_bravo():
+    pass
+def function_charlie():
+    pass
+def function_delta():
+    pass
+def function_echo_fn():
+    pass
+def function_foxtrot():
+    pass
+def function_golf():
+    pass
+def function_hotel():
+    pass
+PYEOF
+
+cat > "$TMPDIR_MW/src/caller_all.py" << 'PYEOF'
+from many_exports import function_alpha, function_bravo, function_charlie
+from many_exports import function_delta, function_echo_fn, function_foxtrot
+from many_exports import function_golf, function_hotel
+function_alpha()
+function_bravo()
+function_charlie()
+function_delta()
+function_echo_fn()
+function_foxtrot()
+function_golf()
+function_hotel()
+PYEOF
+
+STDERR_MW=$(echo "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$TMPDIR_MW/src/many_exports.py\"}}" | (cd "$TMPDIR_MW" && bash "$HOOKS_DIR/ripple-check.sh") 2>&1 >/dev/null)
+# WHY count by "→": each warning line has "name → file:line" format
+WARNING_LINES=$(echo "$STDERR_MW" | grep -c "→" || true)
+if [ "$WARNING_LINES" -le 5 ]; then
+  echo "  PASS: MAX_WARNINGS=5 limits output ($WARNING_LINES warnings)"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: expected ≤5 warnings, got $WARNING_LINES"
+  FAIL=$((FAIL + 1))
+fi
+
+rm -rf "$TMPDIR_MW"
+
+# === block-dangerous-git.sh: bypass marker mechanism ===
+echo ""
+echo "--- block-dangerous-git.sh: bypass marker ---"
+
+# WHY: the bypass marker lets AI proceed after user explicitly approves a blocked operation.
+# Each marker is per-repo + per-command, single-use, 5-minute expiry.
+REPO_HASH_TEST=$(pwd | cksum | cut -d' ' -f1)
+CMD_TEST="git push --force"
+OP_HASH_TEST=$(echo "$CMD_TEST" | cksum | cut -d' ' -f1)
+MARKER_TEST="/tmp/claude-dangerous-op-${REPO_HASH_TEST}-${OP_HASH_TEST}"
+
+# Without marker — blocked
+echo '{"tool_name":"Bash","tool_input":{"command":"git push --force"}}' | bash "$HOOKS_DIR/block-dangerous-git.sh" >/dev/null 2>&1
+check "git push --force without marker → blocked" 2 $?
+
+# With marker — allowed
+touch "$MARKER_TEST"
+echo '{"tool_name":"Bash","tool_input":{"command":"git push --force"}}' | bash "$HOOKS_DIR/block-dangerous-git.sh" >/dev/null 2>&1
+check "git push --force with marker → allowed" 0 $?
+
+# Marker consumed (single-use)
+echo '{"tool_name":"Bash","tool_input":{"command":"git push --force"}}' | bash "$HOOKS_DIR/block-dangerous-git.sh" >/dev/null 2>&1
+check "git push --force after marker consumed → blocked again" 2 $?
+
+# WHY: marker for one command must NOT unlock a different command
+OP_HASH_OTHER=$(echo "rm -rf src/" | cksum | cut -d' ' -f1)
+MARKER_OTHER="/tmp/claude-dangerous-op-${REPO_HASH_TEST}-${OP_HASH_OTHER}"
+touch "$MARKER_OTHER"
+echo '{"tool_name":"Bash","tool_input":{"command":"git push --force"}}' | bash "$HOOKS_DIR/block-dangerous-git.sh" >/dev/null 2>&1
+check "marker for rm -rf doesn't unlock git push --force" 2 $?
+rm -f "$MARKER_OTHER"
+
+rm -f "$MARKER_TEST"
+
 # =============================================
 echo ""
 echo "=== block-dangerous-git.sh (existing tests) ==="

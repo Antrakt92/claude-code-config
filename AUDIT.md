@@ -44,10 +44,10 @@ CLAUDE.md:
 
 ### 2. Запусти тесты
 ```bash
-# Глобальные тесты (42 tests)
+# Глобальные тесты (49 tests)
 bash ~/.claude/hooks/test-hooks.sh
 
-# Проектные тесты investments-calculator (112 tests)
+# Проектные тесты investments-calculator (116 tests)
 cd /c/Users/Dima/Documents/GitHub/investments-calculator && bash .claude/hooks/test-hooks.sh
 ```
 
@@ -128,27 +128,29 @@ cd /c/Users/Dima/Documents/GitHub/investments-calculator && bash .claude/hooks/t
 
 ## Last Audit
 
-**Date:** 2026-03-15 (3rd pass) | **Global tests:** 42/42 PASS | **Project tests (inv-calc):** 112/112 PASS
+**Date:** 2026-03-15 (4th pass) | **Global tests:** 49/49 PASS | **Project tests (inv-calc):** 116/116 PASS
 
 **Architecture:**
 - 6 global hooks (block-dangerous-git, block-protected-files, pre-commit-review, auto-lint-python, auto-lint-typescript, ripple-check)
 - pre-commit-review: Phase 1 (linters+tests) + Phase 2 (diff analysis). Both fully automated, NO marker bypass.
-- Phase 2 checks: `any` types, empty catch/except, TODO/FIXME/HACK, console.log, commit size >500 lines, missing migrations, new files without tests
-- investments-calculator overrides: pre-commit-review.sh, auto-lint-typescript.sh
+- Phase 2 checks (global): `any` types (incl `= any`, `, any`), empty catch/except, TODO/FIXME/HACK, commit size >500 lines, missing migrations
+- Phase 2 checks (inv-calc adds): console.log, new service/router/parser without test
+- investments-calculator overrides: pre-commit-review.sh, auto-lint-typescript.sh, check-css-variables.sh
 - Timesheet overrides: pre-commit-review.sh, auto-lint-typescript.sh
 - ClipboardHistory overrides: pre-commit-review.sh only
-- Double-fire prevention via `[ -f ".claude/hooks/<name>.sh" ] && exit 0` in global hooks
+- Double-fire prevention via `[ -f ".claude/hooks/<name>.sh" ] && exit 0` in global hooks (pre-commit-review, auto-lint-typescript)
 - Timesheet/ClipboardHistory .claude/ dirs are untracked (local only)
 
 **Found & fixed (this session):**
-1. **Phase 2 replaced**: old advisory checklist (AI rubber-stamped `touch marker`) → automated diff analysis (no bypass)
-2. **grep BRE bug**: `^\+\+\+` in BRE treated `\+` as quantifier, filtering ALL diff lines with `+` → fixed to `^+++`
-3. **CLAUDE.md §4 enhanced**: added Read-Before-Edit Rule, Change Size Rule, Uncertainty Disclosure Rule, Test Failure Recovery Protocol
-4. Phase 2 empty "Auto-checks passed:" display — fixed (2nd pass)
-5. Timesheet/ClipboardHistory §12→§9 references — fixed (2nd pass)
-6. +7 new global tests (35→42), +6 new project tests (106→112)
+1. **`any` type pattern expanded**: old pattern `:\s*any\b|<any>|as any` missed `type X = any` and `Record<string, any>` → added `[=,]\s*any\b` (all 3 project hooks + global)
+2. **Stale comments fixed**: Timesheet/ClipboardHistory pre-commit headers said "manual review checklist" but Phase 2 is automated
+3. **ClipboardHistory ROADMAP exclusion**: TODO check was missing `grep -v 'ROADMAP'` that all other hooks had
+4. **+7 global tests (42→49)**: type alias any, generic any, commit size >500, missing migration, Write tool .env, stash drop with ref
+5. **+4 project tests (112→116)**: commented console.log passthrough, 2px CSS exception, type alias any, generic any
 
-**Previous audit fixes still valid:** grep -Fv in ripple-check, uppercase .env, checkout HEAD ., restore --source patterns
+**Previous audit fixes still valid:** grep -Fv in ripple-check, uppercase .env, checkout HEAD ., restore --source, grep BRE +++, Phase 2 automation, commit message stripping
+
+**Consistency verified:** JSON extraction pattern identical in all 12 hook files. Symlinks all valid. Double-fire prevention working for all 3 projects.
 
 **Known false positives (block-dangerous-git bypass marker):** `git restore --staged .`, `git checkout --ours .`, `git stash drop stash@{0}`, `git clean -fX`
-**Known false negatives (by design):** variable expansion, nested scripts, split rm flags, git -C flag, `git push origin :main` (delete branch), uppercase `.ENV` on Windows
+**Known false negatives (by design):** variable expansion, nested scripts, split rm flags, git -C flag, `git push origin :main` (delete branch), uppercase `.ENV` on Windows, multi-line empty catch `catch (e) {\n}`, `find -delete`, `git update-ref -d`

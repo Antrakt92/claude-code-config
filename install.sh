@@ -16,7 +16,7 @@ CLAUDE_DIR="$HOME/.claude"
 # Without it, ln -s creates copies instead of symlinks.
 export MSYS=winsymlinks:nativestrict
 
-echo "Installing claude-code-config to $CLAUDE_DIR (via symlinks)"
+echo "Installing claude-senior to $CLAUDE_DIR (via symlinks)"
 echo ""
 
 # Backup existing files (not symlinks)

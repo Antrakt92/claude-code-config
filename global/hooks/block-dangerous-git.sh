@@ -1,6 +1,6 @@
 #!/bin/bash
 # PreToolUse hook: blocks dangerous CLI operations.
-# Git: force push, reset --hard, clean -f, checkout/restore ., branch -D
+# Git: force push (+refspec), reset --hard, clean -f, checkout -f, checkout/restore ., branch -D, stash drop/clear
 # Filesystem: rm -rf on source directories (whitelist for build artifacts)
 # DB: alembic downgrade
 # Secrets: Bash redirects/cp/mv to .env files
@@ -72,6 +72,13 @@ if echo "$CMD" | grep -qE "git push.*(--force|-f)( |$)"; then
   fi
 fi
 
+# WHY \s\+[^ ]: git supports +refspec as force push syntax — "git push origin +main"
+# is equivalent to "git push --force origin main" for that ref. The \s before + ensures
+# we match a flag/arg boundary, not a branch name containing + (e.g. feature+1).
+if echo "$CMD" | grep -qE "git push.*\s\+[^ ]"; then
+  block "BLOCKED: git push +refspec is a force push. Use --force-with-lease if you must."
+fi
+
 if echo "$CMD" | grep -q "git reset --hard"; then
   block "BLOCKED: git reset --hard discards all uncommitted work. Stash first (git stash)."
 fi
@@ -80,22 +87,38 @@ if echo "$CMD" | grep -qE "git clean.*-f"; then
   block "BLOCKED: git clean -f permanently deletes untracked files. Review with git clean -n first."
 fi
 
-# WHY (-- )?: "git checkout -- ." is the standard POSIX form and more common than
-# "git checkout .". Without the optional "-- ", the standard form bypasses this hook entirely.
-# The \. matches literal dot. ( |$) ensures we don't match "git checkout ./specific/path"
-# which is a safe, targeted operation.
-if echo "$CMD" | grep -qE "git checkout (-- )?\\.( |$)"; then
+# WHY \b.*\s before \.: catches "git checkout ." AND "git checkout HEAD ." AND
+# "git checkout HEAD~1 ." — all restore all files and are destructive.
+# The old pattern (-- )? only caught bare "." and "-- ." forms, missing refs before dot.
+# \b prevents matching "git checkoutx". ( |$) after \. prevents "git checkout ./specific/path".
+# FALSE POSITIVE: "git checkout --ours ." (merge conflict) is blocked — use marker bypass.
+if echo "$CMD" | grep -qE "git checkout\b.*\s\\.( |$)"; then
   block "BLOCKED: git checkout . discards all unstaged changes. Stash first (git stash)."
 fi
 
-# WHY same (-- )? pattern as checkout: "git restore -- ." is equally common and destructive.
-if echo "$CMD" | grep -qE "git restore (-- )?\\.( |$)"; then
+# WHY \s(-f|--force)( |$): catches "git checkout -f main" (force switch, discards local changes).
+# The \s before -f ensures we don't match branch names ending in -f (e.g. my-feature-f).
+# Does NOT overlap with "git checkout ." above — that catches "." target, this catches -f flag.
+if echo "$CMD" | grep -qE "git checkout.*\s(-f|--force)( |$)"; then
+  block "BLOCKED: git checkout -f discards all local changes. Stash first (git stash)."
+fi
+
+# WHY same \b.*\s pattern as checkout: "git restore -- .", "git restore --source=HEAD~1 ."
+# are equally destructive. Catches any flags/refs before the dot target.
+# FALSE POSITIVE: "git restore --staged ." (unstage, not destructive) — use marker bypass.
+if echo "$CMD" | grep -qE "git restore\b.*\s\\.( |$)"; then
   block "BLOCKED: git restore . discards all unstaged changes. Stash first (git stash)."
 fi
 
 # Block force-deleting branches (allow -d safe delete, block -D force delete)
 if echo "$CMD" | grep -qE "git branch.*-D"; then
   block "BLOCKED: git branch -D permanently deletes branch even if unmerged. Use -d for safe delete."
+fi
+
+# WHY drop AND clear: drop loses one stash entry, clear loses ALL. Both are effectively
+# unrecoverable (technically git fsck --unreachable, but that's expert-level recovery).
+if echo "$CMD" | grep -qE "git stash (drop|clear)"; then
+  block "BLOCKED: git stash drop/clear permanently loses stashed work. Verify with user first."
 fi
 
 # === Database dangerous operations ===
@@ -143,18 +166,26 @@ fi
 # WHY separate from block-protected-files.sh: that hook only fires on Edit|Write tools.
 # Bash redirects (echo x > .env), cp, mv, and tee bypass it entirely.
 
-# WHY \.env(\.[a-z]+)?(\s|$): anchors .env to end-of-word to prevent false positives.
-# Matches: .env, .env.local, .env.production, .env.staging
-# Does NOT match: .environment, .envoy, config.env.json (substring match would catch these)
-# The (\.[a-z]+)? allows one dot-suffix. (\s|$) prevents matching .envoy or .environment.
-# WHY exclude .env.example: safe to write — it's a template with placeholder values.
-if echo "$CMD" | grep -qE '(>|>>)\s*[^ ]*\.env(\.[a-z]+)?(\s|$)' && ! echo "$CMD" | grep -q '\.env\.example'; then
+# WHY \.env([.-][a-zA-Z0-9]+)*(\s|$): anchors .env to end-of-word to prevent false positives.
+# Matches: .env, .env.local, .env.PRODUCTION, .env-backup, .env.Development
+# Does NOT match: .environment, .envoy (next char after .env is not [.-], and (\s|$) fails)
+# WHY [.-] not just \.: also catches hyphen-separated variants (.env-backup, .env-staging)
+# WHY [a-zA-Z0-9] not [a-z]: some tools use uppercase (.env.PRODUCTION, .env.LOCAL).
+# WHY exclude .env.example/.env-example: template files with placeholder values, safe to write.
+if echo "$CMD" | grep -qE '(>|>>)\s*[^ ]*\.env([.-][a-zA-Z0-9]+)*(\s|$)' && ! echo "$CMD" | grep -qE '\.env[.-]example'; then
   block "BLOCKED: Writing to .env via redirect. Edit .env files manually outside Claude Code."
 fi
 
-# WHY same \.env(\.[a-z]+)?(\s|$) pattern: consistent with redirect check above.
-if echo "$CMD" | grep -qE '(cp|mv|tee)\s+.*\s+[^ ]*\.env(\.[a-z]+)?(\s|$)' && ! echo "$CMD" | grep -q '\.env\.example'; then
+# WHY same \.env([.-][a-zA-Z0-9]+)*(\s|$) pattern: consistent with redirect check above.
+# WHY cp/mv separate from tee: cp/mv need 2+ args (source dest), so .*\s+ correctly
+# requires a space before the .env target. tee writes to ALL file args directly —
+# "echo x | tee .env" has .env as the only arg, no preceding space after "tee ".
+if echo "$CMD" | grep -qE '(cp|mv)\s+.*\s+[^ ]*\.env([.-][a-zA-Z0-9]+)*(\s|$)' && ! echo "$CMD" | grep -qE '\.env[.-]example'; then
   block "BLOCKED: Copying/moving to .env file. Edit .env files manually outside Claude Code."
+fi
+
+if echo "$CMD" | grep -qE 'tee\s+.*\.env([.-][a-zA-Z0-9]+)*(\s|$)' && ! echo "$CMD" | grep -qE '\.env[.-]example'; then
+  block "BLOCKED: Writing to .env via tee. Edit .env files manually outside Claude Code."
 fi
 
 exit 0

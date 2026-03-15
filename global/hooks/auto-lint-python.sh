@@ -11,7 +11,9 @@ INPUT=$(cat)
 
 # SYNC WITH: all hooks use identical JSON extraction — change one, change all.
 # WHY ([^"\\]|\\.)*: escape-aware JSON extraction, handles \" and \\ in values.
-FILE_PATH=$(echo "$INPUT" | grep -oE '"file_path"[[:space:]]*:[[:space:]]*"([^"\\]|\\.)*"' | head -1 | sed 's/.*:[[:space:]]*"//;s/"$//')
+# WHY unescape \" and \\: JSON encodes paths with backslashes (C:\\Users\\...).
+# Without unescaping, md5sum/ruff receive double-escaped paths.
+FILE_PATH=$(echo "$INPUT" | grep -oE '"file_path"[[:space:]]*:[[:space:]]*"([^"\\]|\\.)*"' | head -1 | sed 's/.*:[[:space:]]*"//;s/"$//' | sed 's/\\"/"/g; s/\\\\/\\/g')
 
 if [ -z "$FILE_PATH" ]; then
   exit 0

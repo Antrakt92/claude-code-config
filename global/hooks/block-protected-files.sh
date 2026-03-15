@@ -10,7 +10,8 @@ INPUT=$(cat)
 
 # WHY ([^"\\]|\\.)*: consistent escape-aware JSON extraction.
 # SYNC WITH: all hooks use identical JSON extraction — change one, change all.
-FILE_PATH=$(echo "$INPUT" | grep -oE '"file_path"[[:space:]]*:[[:space:]]*"([^"\\]|\\.)*"' | head -1 | sed 's/.*:[[:space:]]*"//;s/"$//')
+# WHY unescape \" and \\: JSON encodes paths with backslashes (C:\\Users\\...).
+FILE_PATH=$(echo "$INPUT" | grep -oE '"file_path"[[:space:]]*:[[:space:]]*"([^"\\]|\\.)*"' | head -1 | sed 's/.*:[[:space:]]*"//;s/"$//' | sed 's/\\"/"/g; s/\\\\/\\/g')
 
 if [ -z "$FILE_PATH" ]; then
   exit 0
@@ -20,7 +21,7 @@ BASENAME=$(basename "$FILE_PATH")
 
 # WHY .env* glob (not regex): simpler, catches .env, .env.local, .env.production.
 # WHY *.example exclusion: template files with placeholder values, safe to edit.
-# NOTE: glob is broader than block-dangerous-git.sh regex (\.env(\.[a-z]+)?(\s|$)).
+# NOTE: glob is broader than block-dangerous-git.sh regex (\.env([.-][a-zA-Z0-9]+)*(\s|$)).
 # This also catches .envrc (direnv). Over-blocking is safer for secrets.
 if [[ "$BASENAME" == .env* ]] && [[ "$BASENAME" != *.example ]]; then
   echo "BLOCKED: $BASENAME is a protected secrets file. Edit it manually outside Claude Code." >&2

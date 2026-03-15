@@ -1,6 +1,6 @@
-# claude-code-config
+# claude-senior
 
-A configuration system that turns Claude Code from a capable assistant into an autonomous AI developer. Behavioral rules, automated enforcement, and persistent learning — three layers that compound to give you an estimated 40-60% boost in speed, quality, and reliability over vanilla Claude Code.
+Turn Claude Code from a confident junior into an autonomous senior developer. Behavioral rules, automated enforcement, and persistent learning — three layers that compound to measurably improve speed, quality, and reliability over vanilla Claude Code.
 
 <p align="center">
   <a href="assets/demo.svg">
@@ -121,8 +121,8 @@ Types: `user` (who you are), `feedback` (corrections), `project` (ongoing work c
 ### New machine setup
 
 ```bash
-git clone https://github.com/Antrakt92/claude-code-config.git
-cd claude-code-config
+git clone https://github.com/Antrakt92/claude-senior.git
+cd claude-senior
 bash install.sh
 ```
 

@@ -168,11 +168,11 @@ These fire in EVERY project via `~/.claude/settings.json`. Don't duplicate in pr
 
 Projects add own hooks in `.claude/settings.json` — both global and project hooks fire. Hooks with double-fire prevention (pre-commit-review, auto-lint-typescript) check for project-level overrides and skip automatically.
 
-### Config repo: github.com/Antrakt92/claude-code-config
+### Config repo: github.com/Antrakt92/claude-senior
 
-Files in `~/.claude/` are **symlinks** to `~/Documents/GitHub/claude-code-config/global/`. After changing global config:
+Files in `~/.claude/` are **symlinks** to `~/Documents/GitHub/claude-senior/global/`. After changing global config:
 ```bash
-cd ~/Documents/GitHub/claude-code-config && git add -A && git commit -m "update" && git push
+cd ~/Documents/GitHub/claude-senior && git add -A && git commit -m "update" && git push
 ```
 
 ---

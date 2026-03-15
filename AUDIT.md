@@ -10,13 +10,13 @@ Copy-paste this into a new Claude Code session to run a full audit of the hook s
 ### 1. Прочитай ВСЕ файлы
 
 Глобальные хуки (оригиналы — правь ТОЛЬКО тут):
-- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/block-dangerous-git.sh`
-- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/block-protected-files.sh`
-- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/auto-lint-python.sh`
-- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/auto-lint-typescript.sh`
-- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/pre-commit-review.sh`
-- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/ripple-check.sh`
-- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/test-hooks.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-senior/global/hooks/block-dangerous-git.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-senior/global/hooks/block-protected-files.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-senior/global/hooks/auto-lint-python.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-senior/global/hooks/auto-lint-typescript.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-senior/global/hooks/pre-commit-review.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-senior/global/hooks/ripple-check.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-senior/global/hooks/test-hooks.sh`
 
 Проектные хуки investments-calculator (проектные override глобальных):
 - `C:/Users/Dima/Documents/GitHub/investments-calculator/.claude/hooks/pre-commit-review.sh`
@@ -32,13 +32,13 @@ Copy-paste this into a new Claude Code session to run a full audit of the hook s
 - `C:/Users/Dima/Documents/GitHub/ClipboardHistory/.claude/hooks/pre-commit-review.sh`
 
 settings.json (все три):
-- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/settings.json` (= ~/.claude/settings.json через симлинк)
+- `C:/Users/Dima/Documents/GitHub/claude-senior/global/settings.json` (= ~/.claude/settings.json через симлинк)
 - `C:/Users/Dima/Documents/GitHub/investments-calculator/.claude/settings.json`
 - `C:/Users/Dima/Documents/GitHub/Timesheet/.claude/settings.json` (если есть)
 - `C:/Users/Dima/Documents/GitHub/ClipboardHistory/.claude/settings.json` (если есть)
 
 CLAUDE.md:
-- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/CLAUDE.md` §9 Global Hooks
+- `C:/Users/Dima/Documents/GitHub/claude-senior/global/CLAUDE.md` §9 Global Hooks
 
 Прочитай секцию "Last Audit" внизу этого файла — это контекст прошлого аудита.
 
@@ -58,7 +58,7 @@ cd /c/Users/Dima/Documents/GitHub/investments-calculator && bash .claude/hooks/t
 
 ### 4. Consistency check
 - JSON extraction pattern одинаковый во ВСЕХ hook файлах?
-- Symlinks: `ls -la ~/.claude/hooks/` — все файлы симлинки на claude-code-config/global/hooks/?
+- Symlinks: `ls -la ~/.claude/hooks/` — все файлы симлинки на claude-senior/global/hooks/?
 
 ### 5. Double-fire prevention
 Архитектура: глобальные и проектные хуки fire на одно событие. Предотвращение:
@@ -116,10 +116,10 @@ cd /c/Users/Dima/Documents/GitHub/investments-calculator && bash .claude/hooks/t
 - Запусти тесты после правок
 - Обнови CLAUDE.md §9 Hook Behavior секцию если поведение хуков изменилось (в обоих: global CLAUDE.md и investments-calculator CLAUDE.md)
 - НЕ добавляй новые хуки без явного запроса
-- ВАЖНО: файлы в ~/.claude/hooks/ это СИМЛИНКИ на claude-code-config/global/hooks/. Правь оригиналы в claude-code-config/global/hooks/, не симлинки.
+- ВАЖНО: файлы в ~/.claude/hooks/ это СИМЛИНКИ на claude-senior/global/hooks/. Правь оригиналы в claude-senior/global/hooks/, не симлинки.
 - Проектные хуки (investments-calculator/.claude/hooks/) — это ОТДЕЛЬНЫЕ файлы, не симлинки. Они override глобальные. Правь их напрямую.
 - После всех правок:
-  1. `cd ~/Documents/GitHub/claude-code-config && git add -A && git commit -m "audit fixes" && git push`
+  1. `cd ~/Documents/GitHub/claude-senior && git add -A && git commit -m "audit fixes" && git push`
   2. Если правил проектные хуки: коммит в том проекте тоже
 - **Перезапиши секцию Last Audit** внизу этого файла своими находками (не дописывай — заменяй).
 ```

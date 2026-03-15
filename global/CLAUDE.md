@@ -141,9 +141,12 @@ These fire in EVERY project via `~/.claude/settings.json`. Don't duplicate in pr
 
 - **block-dangerous-git.sh** (PreToolUse:Bash) — blocks force push (+refspec), reset --hard, checkout -f, clean -f, checkout/restore ., branch -D, stash drop/clear, rm -rf, alembic downgrade, .env/.envrc writes. Strips commit -m content before matching. Per-operation marker bypass.
 - **block-protected-files.sh** (PreToolUse:Edit|Write) — blocks .env* (not .env.example/.env-example) and lock files.
+- **pre-commit-review.sh** (PreToolUse:Bash) — universal pre-commit: auto-detects stack (Python/TS/Go/Rust/Node), runs linters+tests (Phase 1, no bypass), then review checklist (Phase 2, marker bypass). Skips if project-level `.claude/hooks/pre-commit-review.sh` exists.
 - **auto-lint-python.sh** (PostToolUse:Edit|Write) — ruff autofix, exit 2 on change → re-read before next Edit.
+- **auto-lint-typescript.sh** (PostToolUse:Edit|Write) — ESLint --fix on .ts/.tsx. Walks up directory tree for config. Same md5sum/exit 2 pattern. Skips if project-level `.claude/hooks/auto-lint-typescript.sh` exists.
+- **ripple-check.sh** (PostToolUse:Edit|Write) — extracts function/class/const names from edited file, greps codebase for usages. Non-blocking (exit 0), warns via stderr. <3s timeout, max 5 warnings.
 
-Projects add own hooks in `.claude/settings.json` — both global and project hooks fire. Avoid double-fire.
+Projects add own hooks in `.claude/settings.json` — both global and project hooks fire. Hooks with double-fire prevention (pre-commit-review, auto-lint-typescript) check for project-level overrides and skip automatically.
 
 ### Config repo: github.com/Antrakt92/claude-code-config
 

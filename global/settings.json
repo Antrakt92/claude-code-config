@@ -75,6 +75,10 @@
           {
             "type": "command",
             "command": "bash ~/.claude/hooks/block-dangerous-git.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/pre-commit-review.sh"
           }
         ]
       }
@@ -86,6 +90,14 @@
           {
             "type": "command",
             "command": "bash ~/.claude/hooks/auto-lint-python.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/auto-lint-typescript.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/ripple-check.sh"
           }
         ]
       }

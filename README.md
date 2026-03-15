@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="assets/demo.svg">
-    <img src="assets/demo.svg?v=3" alt="Demo: pre-commit quality gate blocking bad code" width="780">
+    <img src="assets/demo.svg?v=4" alt="Without vs With claude-senior" width="780">
   </a>
 </p>
 

@@ -196,7 +196,7 @@ Maintain `memory/improvement-log.md` per-project.
 
 These hooks fire in EVERY project via `~/.claude/settings.json`. Do NOT duplicate in project settings.
 
-- **block-dangerous-git.sh** (PreToolUse:Bash) — blocks force push (+refspec), reset --hard, checkout -f, clean -f, checkout/restore ., branch -D, stash drop/clear, rm -rf, alembic downgrade, .env writes. Per-operation marker bypass.
+- **block-dangerous-git.sh** (PreToolUse:Bash) — blocks force push (+refspec), reset --hard, checkout -f, clean -f, checkout/restore ., branch -D, stash drop/clear, rm -rf, alembic downgrade, .env/.envrc writes. Strips commit -m content before matching. Per-operation marker bypass.
 - **block-protected-files.sh** (PreToolUse:Edit|Write) — blocks .env* (not .env.example/.env-example) and lock files.
 - **auto-lint-python.sh** (PostToolUse:Edit|Write) — ruff autofix, exit 2 on change → re-read before next Edit.
 
@@ -223,15 +223,20 @@ Check: uncommitted changes, failing tests, partial tasks. Save handoff notes to 
 
 ## Last Audit
 
-**Date:** 2026-03-15 | **Tests:** 98/98 PASS (was 86/86)
+**Date:** 2026-03-15 | **Tests:** 106/106 PASS (was 86/86)
 
-**Found & fixed:**
-1. `git clean -df` bypassed check — regex `-f` didn't match when `d` precedes `f` in flag cluster → changed to `-[a-zA-Z]*f` (same approach as rm -r pattern)
-2. `git branch -m feature-Dev` false positive — regex `git branch.*-D` matched `-D` substring in branch names → changed to `git branch.*\s-D(\s|$)` (require whitespace boundaries)
-3. `block-protected-files.sh` blocked `.env-example` (hyphen template) — `*.example` glob only matched dot-separated → added explicit `.env-example` exclusion, SYNC'd with block-dangerous-git.sh's `\.env[.-]example`
-4. 12 tests added (86→98): git clean -df, clean -nd dry run, branch -m with -D in name, mv to .env, >> append .env, .env-example allowed, .envrc blocked, row-gap, column-gap, font-size, border-radius, @media print exception
+**Bugs found & fixed (round 1):**
+1. `git clean -df` bypassed check — regex `-f` missed reordered flag clusters → `-[a-zA-Z]*f`
+2. `git branch -m feature-Dev` false positive — `-D` substring in branch names → `\s-D(\s|$)`
+3. `block-protected-files.sh` blocked `.env-example` (hyphen template) → added explicit exclusion
+
+**Enhancements (round 2):**
+4. Commit message stripping — `-m`/`--message` quoted content stripped before pattern matching, prevents false triggers from descriptive commit messages
+5. `.envrc` protection — added to block-dangerous-git.sh .env patterns (direnv executes shell, can contain secrets)
+6. ESLint in Phase 1 — `eslint --max-warnings 0` added to pre-commit-review.sh auto-checks (investments-calculator)
+7. 20 tests added (86→106)
 
 **Known false positives (marker bypass):** `git restore --staged .`, `git checkout --ours .`
-**Known false negatives (by design):** variable expansion, nested scripts, split rm flags (`rm -f -r`), git -c flag, `.envrc` not caught by block-dangerous-git.sh (caught by block-protected-files.sh for Edit/Write)
+**Known false negatives (by design):** variable expansion, nested scripts, split rm flags (`rm -f -r`), git -c flag
 
-**Consistency:** Global hooks (claude-code-config/global/hooks/) identical to investments-calculator project copies. No double-fire in settings.json. JSON extraction pattern consistent across all hooks. Timesheet/ClipboardHistory use same JSON extraction + commit detection. Cross-project drift is by design (different Phase 1 checks per project).
+**Consistency:** Global hooks identical to project copies. No double-fire. JSON extraction consistent across all hooks. Timesheet/ClipboardHistory use same patterns. Cross-project Phase 1 drift by design.

@@ -64,7 +64,7 @@ project/.claude/                        PROJECT — per-repo additions
     └── ripple-checker.md               deep caller analysis agent
 ```
 
-Both global and project hooks fire on every tool call. **Never register the same hook in both** — it will run twice.
+Both global and project hooks fire on every tool call. Global hooks with project-level overrides (`pre-commit-review.sh`, `auto-lint-typescript.sh`) have **double-fire prevention** — they exit 0 if a project-level version exists.
 
 ## Hooks
 
@@ -74,7 +74,7 @@ Both global and project hooks fire on every tool call. **Never register the same
 |------|---------|----------|
 | `block-dangerous-git.sh` | PreToolUse:Bash | **Blocks:** `git push --force`, `reset --hard`, `clean -f`, `checkout .`, `restore .`, `branch -D`, `stash drop/clear`, `rm -rf`, `alembic downgrade`, `.env` writes |
 | `block-protected-files.sh` | PreToolUse:Edit\|Write | **Blocks:** direct edits to `.env*` (not `.env.example`) and lock files |
-| `pre-commit-review.sh` | PreToolUse:Bash | **Phase 1:** runs linter/type-checker/tests — blocks until code passes. **Phase 2:** review checklist — blocks until AI confirms via marker file |
+| `pre-commit-review.sh` | PreToolUse:Bash | **Phase 1:** runs linter/type-checker/tests — blocks until code passes. **Phase 2:** diff analysis — blocks on `any` types, empty catch, TODO/FIXME, `console.log`, commits >500 lines, missing migrations |
 | `auto-lint-python.sh` | PostToolUse:Edit\|Write | Runs `ruff check --fix` + `ruff format`, forces AI to re-read on change |
 | `auto-lint-typescript.sh` | PostToolUse:Edit\|Write | Runs `eslint --fix`, forces AI to re-read on change |
 | `ripple-check.sh` | PostToolUse:Edit\|Write | Greps codebase for definitions in edited file, warns about callers (non-blocking) |
@@ -84,12 +84,14 @@ Both global and project hooks fire on every tool call. **Never register the same
 
 Claude Code hooks use `exit 2` + `stderr` to send messages to the AI (`exit 0` + `stdout` is silently discarded).
 
-**Marker file pattern** for "block then allow":
+**Marker file pattern** (used by `block-dangerous-git.sh` for user-approved overrides):
 ```
-Hook blocks (exit 2) → AI reads stderr → AI does the work →
-AI runs: touch /tmp/claude-marker-HASH → retries → Hook sees marker → exit 0
+Hook blocks (exit 2) → AI reads stderr → user confirms →
+AI runs: touch /tmp/claude-dangerous-op-REPOHASH-OPHASH → retries → Hook sees marker → exit 0
 ```
-Markers are per-operation and expire after 5 minutes.
+Markers are per-repo + per-command, single-use, and expire after 5 minutes.
+
+Note: `pre-commit-review.sh` no longer uses markers — both phases are fully automated.
 
 ## CLAUDE.md Rules
 
@@ -100,7 +102,7 @@ Markers are per-operation and expire after 5 minutes.
 | 1 | **Autonomy** | AI makes all technical decisions without asking for confirmation |
 | 2 | **Judgment Over Execution** | Read callers before changing code, look up APIs when unsure |
 | 3 | **Ripple Effect Rule** | Search ALL usages before changing any function/type/constant |
-| 4 | **Verification & Resilience** | Never say "done" without fresh test evidence; 3-strike rule |
+| 4 | **Verification & Resilience** | Read-before-edit rule, 3-strike rule, test failure recovery protocol |
 | 5 | **Scope & Simplicity** | Follow existing patterns, use existing utilities, don't over-engineer |
 | 6 | **Writing Code for AI** | Types as documentation, named constants, WHY/WARNING/SYNC comments |
 | 7 | **Security** | CSV injection prevention, beyond Claude Code defaults |
@@ -155,12 +157,16 @@ AUDIT.md             audit prompt for systematic hook review
 
 ## Test Suite
 
-106 tests covering all hook logic:
+154 tests across two suites:
 ```bash
+# Global hooks (42 tests)
+bash ~/.claude/hooks/test-hooks.sh
+
+# Project-specific hooks — run from project root (112 tests for investments-calculator)
 bash .claude/hooks/test-hooks.sh
 ```
 
-Covers: command matching, false positive/negative edge cases, JSON escape handling, chained command splitting, CSS pattern detection, marker file lifecycle.
+Covers: command matching, false positive/negative edge cases, JSON escape handling, chained command splitting, CSS pattern detection, Phase 2 diff analysis (`any` types, TODO, empty catch, console.log), bypass marker lifecycle, ripple-check grep-Fv and MAX_WARNINGS.
 
 ## Known Limitations
 

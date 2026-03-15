@@ -44,10 +44,10 @@ CLAUDE.md:
 
 ### 2. Запусти тесты
 ```bash
-# Глобальные тесты (35 tests)
+# Глобальные тесты (42 tests)
 bash ~/.claude/hooks/test-hooks.sh
 
-# Проектные тесты investments-calculator (106 tests)
+# Проектные тесты investments-calculator (112 tests)
 cd /c/Users/Dima/Documents/GitHub/investments-calculator && bash .claude/hooks/test-hooks.sh
 ```
 

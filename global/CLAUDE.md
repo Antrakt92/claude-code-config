@@ -41,6 +41,14 @@ When changing any function, type, constant, or interface:
 Edit in dependency order: models/schemas → services/logic → API endpoints → frontend.
 Never leave an intermediate broken state. If backend changes, update frontend types too.
 
+### File Rename/Move Rule
+After renaming or moving ANY file:
+1. **Grep the old path** across the entire codebase — imports, requires, config references
+2. **Update every import** — don't rename `utils.py` to `helpers.py` and leave `from utils import` in 5 files
+3. **Check string references** — config files, test fixtures, documentation that reference the old path
+
+**WHY:** AI renames a file, updates the 2 imports it remembers, forgets the other 3. Especially common with TypeScript barrel exports and Python relative imports.
+
 ---
 
 ## 4. Verification & Resilience
@@ -65,7 +73,16 @@ If you're unsure about ANY aspect of your implementation: **say so explicitly**.
 "I'm not sure if X handles Y correctly" is better than silently guessing wrong.
 **WHY:** AI's default is false confidence. Actively counter it. User can course-correct early.
 
-**After context compression** — re-orient via `git diff`. Use TodoWrite for 3+ step tasks. One task fully complete before the next.
+### Context Recovery Protocol
+After context compression (system message about it):
+1. **Run `git diff`** to see what you've changed this session
+2. **Re-read any file** you're actively editing — your memory of its contents is now unreliable
+3. **Check TodoWrite** — your task list survives compression, use it to re-orient
+4. **Do NOT continue editing from memory** — compression may have dropped critical details
+
+**WHY:** After compression, AI continues editing as if nothing happened, but its "memory" of file contents is now partial. Causes wrong old_string in Edit calls, stale logic, forgotten requirements.
+
+One task fully complete before the next.
 
 ### 3-Strike Rule
 If approach fails 3 times: **STOP**.
@@ -82,6 +99,15 @@ When a test fails:
 4. Only THEN attempt a fix
 
 **NEVER:** change the test to match broken code. **NEVER:** retry the same fix with minor tweaks.
+
+### Regression Test First Rule
+When fixing a bug:
+1. **Write a failing test** that reproduces the bug
+2. **Run it** — confirm it fails for the right reason
+3. **Fix the code**
+4. **Run the test again** — confirm it passes
+
+**WHY:** Without a regression test, AI "fixes" the bug but has no proof it was broken or that the fix works. The bug returns next time AI touches that code.
 
 **Anti-patterns:** repeating failed approaches with small tweaks, multiple unrelated changes at once.
 

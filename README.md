@@ -6,8 +6,6 @@ A configuration system that turns Claude Code from a capable assistant into an a
   <a href="assets/demo.svg">
     <img src="assets/demo.svg" alt="Demo: pre-commit quality gate, auto-lint, safety net" width="780">
   </a>
-  <br>
-  <em>Click to see animated demo (3 scenes)</em>
 </p>
 
 ## What it gives you

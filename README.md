@@ -8,6 +8,20 @@ Turn Claude Code from a confident junior into an autonomous senior developer. Be
   </a>
 </p>
 
+## What is this?
+
+Not a plugin. Not a skill. Not just config.
+
+**claude-senior** is a hardening framework for Claude Code — behavioral rules that shape how the AI thinks, shell hooks that enforce them automatically, and a memory system that makes it learn from mistakes. Three layers working together:
+
+| Layer | What it does | Example |
+|-------|-------------|---------|
+| **Behavioral** (CLAUDE.md) | Shapes AI decision-making | "Before every Edit, re-read the file if you haven't in 3 tool calls" |
+| **Enforcement** (hooks) | Catches violations automatically | Blocks commit if staged diff contains `any` types or `console.log` |
+| **Learning** (memory) | Persists corrections across sessions | AI logs "I forgot to update callers" → doesn't repeat next time |
+
+No existing Claude Code plugin does this. Plugins add new tools (browser, database). **claude-senior** makes the AI itself better at using the tools it already has.
+
 ## What it gives you
 
 | Capability | How it works |

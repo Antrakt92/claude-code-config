@@ -54,6 +54,13 @@ block() {
   exit 2
 }
 
+# --- Strip commit message content to prevent false triggers ---
+# WHY: "git commit -m 'fix: git clean -df'" contains "git clean -df" which triggers
+# the clean check below. Only strip -m/--message quoted args — not all quoted strings,
+# because filenames like ".env" in cp/mv commands must remain for .env checks.
+# Applied AFTER bypass marker (OP_HASH) so markers match the original command.
+CMD=$(echo "$CMD" | sed -E 's/(-m|--message)[[:space:]]+"([^"\\]|\\.)*"/\1 ""/g' | sed -E "s/(-m|--message)[[:space:]]+'[^']*'/\1 ''/g")
+
 # === Git dangerous operations ===
 
 # WHY (--force|-f)( |$): matches --force/- f followed by space or end-of-line.
@@ -170,25 +177,27 @@ fi
 # WHY separate from block-protected-files.sh: that hook only fires on Edit|Write tools.
 # Bash redirects (echo x > .env), cp, mv, and tee bypass it entirely.
 
-# WHY \.env([.-][a-zA-Z0-9]+)*(\s|$): anchors .env to end-of-word to prevent false positives.
-# Matches: .env, .env.local, .env.PRODUCTION, .env-backup, .env.Development
-# Does NOT match: .environment, .envoy (next char after .env is not [.-], and (\s|$) fails)
+# WHY \.env(rc|[.-][a-zA-Z0-9]+)*(\s|$): anchors .env to end-of-word to prevent false positives.
+# Matches: .env, .env.local, .env.PRODUCTION, .env-backup, .envrc
+# Does NOT match: .environment, .envoy (next char after .env is not rc/[.-], and (\s|$) fails)
+# WHY rc alternative: .envrc (direnv) executes arbitrary shell on cd — can contain secrets.
 # WHY [.-] not just \.: also catches hyphen-separated variants (.env-backup, .env-staging)
 # WHY [a-zA-Z0-9] not [a-z]: some tools use uppercase (.env.PRODUCTION, .env.LOCAL).
 # WHY exclude .env.example/.env-example: template files with placeholder values, safe to write.
-if echo "$CMD" | grep -qE '(>|>>)\s*[^ ]*\.env([.-][a-zA-Z0-9]+)*(\s|$)' && ! echo "$CMD" | grep -qE '\.env[.-]example'; then
+ENV_PATTERN='\.env(rc|[.-][a-zA-Z0-9]+)*(\s|$)'
+
+if echo "$CMD" | grep -qE "(>|>>)\s*[^ ]*${ENV_PATTERN}" && ! echo "$CMD" | grep -qE '\.env[.-]example'; then
   block "BLOCKED: Writing to .env via redirect. Edit .env files manually outside Claude Code."
 fi
 
-# WHY same \.env([.-][a-zA-Z0-9]+)*(\s|$) pattern: consistent with redirect check above.
 # WHY cp/mv separate from tee: cp/mv need 2+ args (source dest), so .*\s+ correctly
 # requires a space before the .env target. tee writes to ALL file args directly —
 # "echo x | tee .env" has .env as the only arg, no preceding space after "tee ".
-if echo "$CMD" | grep -qE '(cp|mv)\s+.*\s+[^ ]*\.env([.-][a-zA-Z0-9]+)*(\s|$)' && ! echo "$CMD" | grep -qE '\.env[.-]example'; then
+if echo "$CMD" | grep -qE "(cp|mv)\s+.*\s+[^ ]*${ENV_PATTERN}" && ! echo "$CMD" | grep -qE '\.env[.-]example'; then
   block "BLOCKED: Copying/moving to .env file. Edit .env files manually outside Claude Code."
 fi
 
-if echo "$CMD" | grep -qE 'tee\s+.*\.env([.-][a-zA-Z0-9]+)*(\s|$)' && ! echo "$CMD" | grep -qE '\.env[.-]example'; then
+if echo "$CMD" | grep -qE "tee\s+.*${ENV_PATTERN}" && ! echo "$CMD" | grep -qE '\.env[.-]example'; then
   block "BLOCKED: Writing to .env via tee. Edit .env files manually outside Claude Code."
 fi
 

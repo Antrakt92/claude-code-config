@@ -1,148 +1,188 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 440">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 580">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#252540"/>
+      <stop offset="100%" stop-color="#1e1e35"/>
+    </linearGradient>
+    <linearGradient id="red-glow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f38ba8" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#f38ba8" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="green-glow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#a6e3a1" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#a6e3a1" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
   <style>
-    /* WHY 12s total: 6s blocked scene + 1s transition + 4s success scene + 1s transition */
-    @keyframes scene1 { 0%,4% { opacity: 0 } 6%,48% { opacity: 1 } 50%,100% { opacity: 0 } }
-    @keyframes scene2 { 0%,52% { opacity: 0 } 55%,95% { opacity: 1 } 98%,100% { opacity: 0 } }
+    @keyframes scene1 { 0%,3%{opacity:0} 5%,47%{opacity:1} 50%,100%{opacity:0} }
+    @keyframes scene2 { 0%,50%,53%{opacity:0} 55%,95%{opacity:1} 98%,100%{opacity:0} }
 
-    /* Staggered line reveals within each scene */
-    @keyframes line1 { 0%,8% { opacity: 0 } 10%,48% { opacity: 1 } 50%,100% { opacity: 0 } }
-    @keyframes line2 { 0%,12% { opacity: 0 } 14%,48% { opacity: 1 } 50%,100% { opacity: 0 } }
-    @keyframes line3 { 0%,16% { opacity: 0 } 18%,48% { opacity: 1 } 50%,100% { opacity: 0 } }
-    @keyframes line4 { 0%,20% { opacity: 0 } 22%,48% { opacity: 1 } 50%,100% { opacity: 0 } }
-    @keyframes line5 { 0%,24% { opacity: 0 } 26%,48% { opacity: 1 } 50%,100% { opacity: 0 } }
-    @keyframes line6 { 0%,28% { opacity: 0 } 30%,48% { opacity: 1 } 50%,100% { opacity: 0 } }
-    @keyframes line7 { 0%,32% { opacity: 0 } 34%,48% { opacity: 1 } 50%,100% { opacity: 0 } }
-    @keyframes line8 { 0%,36% { opacity: 0 } 38%,48% { opacity: 1 } 50%,100% { opacity: 0 } }
+    @keyframes popIn1 { 0%,8%{opacity:0;transform:translateY(10px)} 12%,47%{opacity:1;transform:translateY(0)} 50%,100%{opacity:0} }
+    @keyframes popIn2 { 0%,16%{opacity:0;transform:translateY(10px)} 20%,47%{opacity:1;transform:translateY(0)} 50%,100%{opacity:0} }
+    @keyframes popIn3 { 0%,24%{opacity:0;transform:translateY(10px)} 28%,47%{opacity:1;transform:translateY(0)} 50%,100%{opacity:0} }
+    @keyframes popIn4 { 0%,32%{opacity:0;transform:translateY(10px)} 36%,47%{opacity:1;transform:translateY(0)} 50%,100%{opacity:0} }
 
-    @keyframes s2line1 { 0%,56% { opacity: 0 } 58%,95% { opacity: 1 } 98%,100% { opacity: 0 } }
-    @keyframes s2line2 { 0%,60% { opacity: 0 } 62%,95% { opacity: 1 } 98%,100% { opacity: 0 } }
-    @keyframes s2line3 { 0%,64% { opacity: 0 } 66%,95% { opacity: 1 } 98%,100% { opacity: 0 } }
-    @keyframes s2line4 { 0%,68% { opacity: 0 } 70%,95% { opacity: 1 } 98%,100% { opacity: 0 } }
-    @keyframes s2line5 { 0%,72% { opacity: 0 } 74%,95% { opacity: 1 } 98%,100% { opacity: 0 } }
-    @keyframes s2line6 { 0%,78% { opacity: 0 } 80%,95% { opacity: 1 } 98%,100% { opacity: 0 } }
-    @keyframes s2line7 { 0%,82% { opacity: 0 } 84%,95% { opacity: 1 } 98%,100% { opacity: 0 } }
+    @keyframes popIn5 { 0%,58%{opacity:0;transform:translateY(10px)} 62%,95%{opacity:1;transform:translateY(0)} 98%,100%{opacity:0} }
+    @keyframes popIn6 { 0%,64%{opacity:0;transform:translateY(10px)} 68%,95%{opacity:1;transform:translateY(0)} 98%,100%{opacity:0} }
+    @keyframes popIn7 { 0%,70%{opacity:0;transform:translateY(10px)} 74%,95%{opacity:1;transform:translateY(0)} 98%,100%{opacity:0} }
+    @keyframes popIn8 { 0%,76%{opacity:0;transform:translateY(10px)} 80%,95%{opacity:1;transform:translateY(0)} 98%,100%{opacity:0} }
 
-    @keyframes cursor { 0%,100% { opacity: 1 } 50% { opacity: 0 } }
+    @keyframes pulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
 
-    .bg { fill: #1e1e2e; }
-    .bar { fill: #313244; }
-    .t { font-family: 'SF Mono','Cascadia Code','Fira Code',Consolas,monospace; font-size: 13.5px; }
-    .prompt { fill: #a6e3a1; }
-    .cmd { fill: #cdd6f4; }
+    .t { font-family: -apple-system,'Segoe UI',Helvetica,Arial,sans-serif; }
+    .mono { font-family: 'SF Mono','Cascadia Code','Fira Code',Consolas,monospace; }
     .red { fill: #f38ba8; }
-    .redb { fill: #f38ba8; font-weight: bold; }
     .orange { fill: #fab387; }
     .green { fill: #a6e3a1; }
-    .greenb { fill: #a6e3a1; font-weight: bold; }
-    .dim { fill: #585b70; }
-    .title { fill: #bac2de; font-size: 12px; }
+    .blue { fill: #89b4fa; }
+    .mauve { fill: #cba6f7; }
+    .text { fill: #cdd6f4; }
+    .dim { fill: #6c7086; }
+    .white { fill: #ffffff; }
 
-    .s1 { animation: scene1 12s ease infinite; }
-    .l1 { animation: line1 12s ease infinite; }
-    .l2 { animation: line2 12s ease infinite; }
-    .l3 { animation: line3 12s ease infinite; }
-    .l4 { animation: line4 12s ease infinite; }
-    .l5 { animation: line5 12s ease infinite; }
-    .l6 { animation: line6 12s ease infinite; }
-    .l7 { animation: line7 12s ease infinite; }
-    .l8 { animation: line8 12s ease infinite; }
+    .s1 { animation: scene1 14s ease infinite; }
+    .p1 { animation: popIn1 14s ease infinite; }
+    .p2 { animation: popIn2 14s ease infinite; }
+    .p3 { animation: popIn3 14s ease infinite; }
+    .p4 { animation: popIn4 14s ease infinite; }
 
-    .s2 { animation: scene2 12s ease infinite; }
-    .s2l1 { animation: s2line1 12s ease infinite; }
-    .s2l2 { animation: s2line2 12s ease infinite; }
-    .s2l3 { animation: s2line3 12s ease infinite; }
-    .s2l4 { animation: s2line4 12s ease infinite; }
-    .s2l5 { animation: s2line5 12s ease infinite; }
-    .s2l6 { animation: s2line6 12s ease infinite; }
-    .s2l7 { animation: s2line7 12s ease infinite; }
+    .s2 { animation: scene2 14s ease infinite; }
+    .p5 { animation: popIn5 14s ease infinite; }
+    .p6 { animation: popIn6 14s ease infinite; }
+    .p7 { animation: popIn7 14s ease infinite; }
+    .p8 { animation: popIn8 14s ease infinite; }
+
+    .blink { animation: pulse 2s ease infinite; }
   </style>
 
-  <!-- Terminal chrome -->
-  <rect class="bg" width="820" height="440" rx="10"/>
-  <rect class="bar" width="820" height="36" rx="10"/>
-  <rect class="bg" y="26" width="820" height="10"/>
-  <circle cx="20" cy="18" r="6" fill="#f38ba8"/>
-  <circle cx="40" cy="18" r="6" fill="#fab387"/>
-  <circle cx="60" cy="18" r="6" fill="#a6e3a1"/>
-  <text x="410" y="22" text-anchor="middle" class="title t">claude-senior</text>
+  <!-- Background -->
+  <rect width="840" height="580" rx="12" fill="url(#bg)"/>
 
-  <!-- ═══════ SCENE 1: BLOCKED ═══════ -->
+  <!-- Top badge -->
+  <rect x="310" y="16" width="220" height="28" rx="14" fill="#252540" stroke="#454570" stroke-width="1"/>
+  <text x="420" y="35" text-anchor="middle" class="t dim" font-size="12" font-weight="500">claude-senior v1.0</text>
+
+  <!-- ═══════ SCENE 1: WITHOUT / PROBLEMS ═══════ -->
   <g class="s1">
-    <text x="20" y="62" class="t prompt">❯</text>
-    <text x="40" y="62" class="t cmd">git commit -m "feat: add tax calculator"</text>
+    <text x="420" y="82" text-anchor="middle" class="t red" font-size="22" font-weight="700">Without claude-senior</text>
+    <text x="420" y="106" text-anchor="middle" class="t dim" font-size="14">Claude Code ships broken code and calls it "done"</text>
   </g>
 
-  <g class="l1">
-    <text x="20" y="94" class="t redb">COMMIT BLOCKED — Diff analysis found issues</text>
+  <!-- Problem cards -->
+  <g class="p1">
+    <rect x="40" y="130" width="360" height="88" rx="10" fill="url(#card)" filter="url(#shadow)"/>
+    <rect x="40" y="130" width="4" height="88" rx="2" fill="#f38ba8"/>
+    <text x="60" y="158" class="t red" font-size="20">✗</text>
+    <text x="85" y="157" class="t text" font-size="14" font-weight="600">Commits console.log &amp; any types</text>
+    <text x="85" y="178" class="mono dim" font-size="12">console.log("debug:", data)</text>
+    <text x="85" y="198" class="mono dim" font-size="12">function process(x: any): any { }</text>
   </g>
 
-  <g class="l2">
-    <text x="20" y="128" class="t red">✗</text>
-    <text x="40" y="128" class="t orange">CONSOLE.LOG FOUND in staged changes</text>
-  </g>
-  <g class="l3">
-    <text x="50" y="150" class="t dim">+  console.log("tax:", totalTax);</text>
-  </g>
-
-  <g class="l4">
-    <text x="20" y="182" class="t red">✗</text>
-    <text x="40" y="182" class="t orange">TYPE 'any' FOUND in staged TS changes</text>
-  </g>
-  <g class="l5">
-    <text x="50" y="204" class="t dim">+  function process(input: any): any {</text>
+  <g class="p2">
+    <rect x="440" y="130" width="360" height="88" rx="10" fill="url(#card)" filter="url(#shadow)"/>
+    <rect x="440" y="130" width="4" height="88" rx="2" fill="#f38ba8"/>
+    <text x="460" y="158" class="t red" font-size="20">✗</text>
+    <text x="485" y="157" class="t text" font-size="14" font-weight="600">Changes function, forgets callers</text>
+    <text x="485" y="178" class="mono dim" font-size="12">Changed calculate_tax() signature</text>
+    <text x="485" y="198" class="mono dim" font-size="12">4 files still call the old version</text>
   </g>
 
-  <g class="l6">
-    <text x="20" y="236" class="t red">✗</text>
-    <text x="40" y="236" class="t orange">EMPTY CATCH found — add error handling</text>
-  </g>
-  <g class="l7">
-    <text x="50" y="258" class="t dim">+  } catch (e) {}</text>
-  </g>
-
-  <g class="l8">
-    <text x="20" y="296" class="t redb">Fix the issues above, then retry commit.</text>
+  <g class="p3">
+    <rect x="40" y="238" width="360" height="88" rx="10" fill="url(#card)" filter="url(#shadow)"/>
+    <rect x="40" y="238" width="4" height="88" rx="2" fill="#f38ba8"/>
+    <text x="60" y="266" class="t red" font-size="20">✗</text>
+    <text x="85" y="265" class="t text" font-size="14" font-weight="600">Says "done" without running tests</text>
+    <text x="85" y="286" class="mono dim" font-size="12">"I've fixed the bug" → tests are broken</text>
+    <text x="85" y="306" class="mono dim" font-size="12">"Should work" = hasn't verified</text>
   </g>
 
-  <!-- ═══════ SCENE 2: FIXED ═══════ -->
+  <g class="p4">
+    <rect x="440" y="238" width="360" height="88" rx="10" fill="url(#card)" filter="url(#shadow)"/>
+    <rect x="440" y="238" width="4" height="88" rx="2" fill="#f38ba8"/>
+    <text x="460" y="266" class="t red" font-size="20">✗</text>
+    <text x="485" y="265" class="t text" font-size="14" font-weight="600">Runs git push --force, rm -rf</text>
+    <text x="485" y="286" class="mono dim" font-size="12">Destroys remote history</text>
+    <text x="485" y="306" class="mono dim" font-size="12">Deletes source directories</text>
+  </g>
+
+  <!-- Bottom tagline scene 1 -->
+  <g class="s1">
+    <rect x="200" y="360" width="440" height="44" rx="22" fill="none" stroke="#f38ba8" stroke-width="1.5" stroke-opacity="0.5"/>
+    <text x="420" y="387" text-anchor="middle" class="t red" font-size="15" font-weight="600">You won't catch it — you never read the code</text>
+  </g>
+
+  <!-- ═══════ SCENE 2: WITH / SOLUTIONS ═══════ -->
   <g class="s2">
-    <text x="20" y="62" class="t prompt">❯</text>
-    <text x="40" y="62" class="t cmd">git commit -m "feat: add tax calculator"</text>
+    <text x="420" y="82" text-anchor="middle" class="t green" font-size="22" font-weight="700">With claude-senior</text>
+    <text x="420" y="106" text-anchor="middle" class="t dim" font-size="14">7 hooks + 10 behavioral rules + persistent memory</text>
   </g>
 
-  <g class="s2l1">
-    <text x="20" y="94" class="t green">✓</text>
-    <text x="40" y="94" class="t green">ruff check</text>
-    <text x="140" y="94" class="t dim">passed</text>
-  </g>
-  <g class="s2l2">
-    <text x="20" y="118" class="t green">✓</text>
-    <text x="40" y="118" class="t green">pytest 357 tests</text>
-    <text x="210" y="118" class="t dim">passed in 14.2s</text>
-  </g>
-  <g class="s2l3">
-    <text x="20" y="142" class="t green">✓</text>
-    <text x="40" y="142" class="t green">tsc --noEmit</text>
-    <text x="170" y="142" class="t dim">passed</text>
-  </g>
-  <g class="s2l4">
-    <text x="20" y="166" class="t green">✓</text>
-    <text x="40" y="166" class="t green">eslint --max-warnings 0</text>
-    <text x="280" y="166" class="t dim">passed</text>
-  </g>
-  <g class="s2l5">
-    <text x="20" y="190" class="t green">✓</text>
-    <text x="40" y="190" class="t green">diff analysis</text>
-    <text x="180" y="190" class="t dim">clean</text>
+  <g class="p5">
+    <rect x="40" y="130" width="360" height="88" rx="10" fill="url(#card)" filter="url(#shadow)"/>
+    <rect x="40" y="130" width="4" height="88" rx="2" fill="#a6e3a1"/>
+    <text x="60" y="158" class="t green" font-size="20">✓</text>
+    <text x="85" y="157" class="t text" font-size="14" font-weight="600">Blocks bad code before commit</text>
+    <text x="85" y="178" class="mono green" font-size="12">console.log → BLOCKED</text>
+    <text x="85" y="198" class="mono green" font-size="12">any types → BLOCKED · catch {} → BLOCKED</text>
   </g>
 
-  <g class="s2l6">
-    <text x="20" y="228" class="t greenb">[main a1b2c3d] feat: add tax calculator</text>
+  <g class="p6">
+    <rect x="440" y="130" width="360" height="88" rx="10" fill="url(#card)" filter="url(#shadow)"/>
+    <rect x="440" y="130" width="4" height="88" rx="2" fill="#a6e3a1"/>
+    <text x="460" y="158" class="t green" font-size="20">✓</text>
+    <text x="485" y="157" class="t text" font-size="14" font-weight="600">Warns about affected callers</text>
+    <text x="485" y="178" class="mono green" font-size="12">RIPPLE CHECK: calculate_tax used in</text>
+    <text x="485" y="198" class="mono green" font-size="12">→ api.py:42  service.py:18  views.py:7</text>
   </g>
 
-  <g class="s2l7">
-    <text x="20" y="268" class="t orange">RIPPLE CHECK: calculate_tax also used in:</text>
-    <text x="30" y="290" class="t dim">  calculate_tax → api.py:42  service.py:18  views.py:7</text>
-    <text x="30" y="312" class="t dim">  Did you update all callers?</text>
+  <g class="p7">
+    <rect x="40" y="238" width="360" height="88" rx="10" fill="url(#card)" filter="url(#shadow)"/>
+    <rect x="40" y="238" width="4" height="88" rx="2" fill="#a6e3a1"/>
+    <text x="60" y="266" class="t green" font-size="20">✓</text>
+    <text x="85" y="265" class="t text" font-size="14" font-weight="600">Runs all checks automatically</text>
+    <text x="85" y="286" class="mono green" font-size="12">ruff ✓  pytest ✓  tsc ✓  eslint ✓</text>
+    <text x="85" y="306" class="mono green" font-size="12">No bypass. Fix the code, retry.</text>
   </g>
+
+  <g class="p8">
+    <rect x="440" y="238" width="360" height="88" rx="10" fill="url(#card)" filter="url(#shadow)"/>
+    <rect x="440" y="238" width="4" height="88" rx="2" fill="#a6e3a1"/>
+    <text x="460" y="266" class="t green" font-size="20">✓</text>
+    <text x="485" y="265" class="t text" font-size="14" font-weight="600">Blocks destructive commands</text>
+    <text x="485" y="286" class="mono green" font-size="12">git push --force → BLOCKED</text>
+    <text x="485" y="306" class="mono green" font-size="12">rm -rf src/ → BLOCKED · .env → BLOCKED</text>
+  </g>
+
+  <!-- Bottom tagline scene 2 -->
+  <g class="s2">
+    <rect x="200" y="360" width="440" height="44" rx="22" fill="none" stroke="#a6e3a1" stroke-width="1.5" stroke-opacity="0.5"/>
+    <text x="420" y="387" text-anchor="middle" class="t green" font-size="15" font-weight="600">The AI catches its own mistakes before you see them</text>
+  </g>
+
+  <!-- Bottom stats (always visible) -->
+  <g>
+    <rect x="80" y="430" width="200" height="70" rx="10" fill="url(#card)" filter="url(#shadow)"/>
+    <text x="180" y="460" text-anchor="middle" class="t blue" font-size="24" font-weight="700">7</text>
+    <text x="180" y="482" text-anchor="middle" class="t dim" font-size="12">automated hooks</text>
+
+    <rect x="320" y="430" width="200" height="70" rx="10" fill="url(#card)" filter="url(#shadow)"/>
+    <text x="420" y="460" text-anchor="middle" class="t mauve" font-size="24" font-weight="700">10</text>
+    <text x="420" y="482" text-anchor="middle" class="t dim" font-size="12">behavioral rules</text>
+
+    <rect x="560" y="430" width="200" height="70" rx="10" fill="url(#card)" filter="url(#shadow)"/>
+    <text x="660" y="460" text-anchor="middle" class="t orange" font-size="24" font-weight="700">3 min</text>
+    <text x="660" y="482" text-anchor="middle" class="t dim" font-size="12">to install</text>
+  </g>
+
+  <!-- Install hint -->
+  <text x="420" y="540" text-anchor="middle" class="mono dim" font-size="12">git clone https://github.com/Antrakt92/claude-senior.git &amp;&amp; bash install.sh</text>
+  <text x="420" y="565" text-anchor="middle" class="t dim" font-size="11" class="blink">★ Star if this saved your AI from shipping broken code</text>
 </svg>

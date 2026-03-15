@@ -128,18 +128,24 @@ cd /c/Users/Dima/Documents/GitHub/investments-calculator && bash .claude/hooks/t
 
 ## Last Audit
 
-**Date:** 2026-03-15 | **Global tests:** 35/35 PASS | **Project tests (inv-calc):** 106/106 PASS
+**Date:** 2026-03-15 (2nd audit) | **Global tests:** 41/41 PASS | **Project tests (inv-calc):** 106/106 PASS
 
 **Architecture:**
 - 6 global hooks (block-dangerous-git, block-protected-files, pre-commit-review, auto-lint-python, auto-lint-typescript, ripple-check)
 - pre-commit-review (global) = universal stack auto-detection (Python/TS/Go/Rust/Node)
 - investments-calculator overrides: pre-commit-review.sh, auto-lint-typescript.sh (project-specific)
+- Timesheet overrides: pre-commit-review.sh, auto-lint-typescript.sh
+- ClipboardHistory overrides: pre-commit-review.sh only
 - Double-fire prevention via `[ -f ".claude/hooks/<name>.sh" ] && exit 0` in global hooks
+- Timesheet/ClipboardHistory .claude/ dirs are untracked (local only)
 
 **Found & fixed (this session):**
-1. ripple-check.sh: `grep -v` → `grep -Fv` — dots in basenames like `app.test.tsx` were regex wildcards
-2. pre-commit-review.sh: Phase 2 PASSED tracking now reflects actually-run checks (not all possible checks)
-3. Previous audit fixes still valid: uppercase .env, checkout HEAD ., restore --source patterns
+1. inv-calc pre-commit-review.sh: Phase 2 showed empty "Auto-checks passed: " when only CSS files staged — now conditional
+2. inv-calc pre-commit-review.sh: double blank line before WARNING removed
+3. Timesheet/ClipboardHistory pre-commit-review.sh: stale §12→§9 SYNC WITH references
+4. Global test-hooks.sh: +6 new tests (35→41) — bypass marker mechanism, grep -Fv regex-special filenames, MAX_WARNINGS=5 limit
 
-**Known false positives (marker bypass):** `git restore --staged .`, `git checkout --ours .`
-**Known false negatives (by design):** variable expansion, nested scripts, split rm flags, git -C flag
+**Previous audit fixes still valid:** grep -Fv in ripple-check, uppercase .env, checkout HEAD ., restore --source patterns
+
+**Known false positives (marker bypass):** `git restore --staged .`, `git checkout --ours .`, `git stash drop stash@{0}`, `git clean -fX`
+**Known false negatives (by design):** variable expansion, nested scripts, split rm flags, git -C flag, `git push origin :main` (delete branch), uppercase `.ENV` on Windows

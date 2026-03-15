@@ -8,16 +8,21 @@ Copy-paste this into a new Claude Code session to run a full audit of the hook s
 ## Что сделать
 
 ### 1. Прочитай ВСЕ файлы
-Глобальные хуки (симлинки на ~/Documents/GitHub/claude-code-config/global/):
-- `C:/Users/Dima/.claude/hooks/block-dangerous-git.sh`
-- `C:/Users/Dima/.claude/hooks/block-protected-files.sh`
-- `C:/Users/Dima/.claude/hooks/auto-lint-python.sh`
 
-Проектные хуки investments-calculator:
-- `.claude/hooks/pre-commit-review.sh`
-- `.claude/hooks/auto-lint-typescript.sh`
-- `.claude/hooks/check-css-variables.sh`
-- `.claude/hooks/test-hooks.sh`
+Глобальные хуки (оригиналы — правь ТОЛЬКО тут):
+- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/block-dangerous-git.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/block-protected-files.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/auto-lint-python.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/auto-lint-typescript.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/pre-commit-review.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/ripple-check.sh`
+- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/hooks/test-hooks.sh`
+
+Проектные хуки investments-calculator (проектные override глобальных):
+- `C:/Users/Dima/Documents/GitHub/investments-calculator/.claude/hooks/pre-commit-review.sh`
+- `C:/Users/Dima/Documents/GitHub/investments-calculator/.claude/hooks/auto-lint-typescript.sh`
+- `C:/Users/Dima/Documents/GitHub/investments-calculator/.claude/hooks/check-css-variables.sh`
+- `C:/Users/Dima/Documents/GitHub/investments-calculator/.claude/hooks/test-hooks.sh`
 
 Проектные хуки Timesheet:
 - `C:/Users/Dima/Documents/GitHub/Timesheet/.claude/hooks/pre-commit-review.sh`
@@ -26,38 +31,67 @@ Copy-paste this into a new Claude Code session to run a full audit of the hook s
 Проектные хуки ClipboardHistory:
 - `C:/Users/Dima/Documents/GitHub/ClipboardHistory/.claude/hooks/pre-commit-review.sh`
 
-settings.json (оба):
-- `C:/Users/Dima/.claude/settings.json`
-- `.claude/settings.json`
+settings.json (все три):
+- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/settings.json` (= ~/.claude/settings.json через симлинк)
+- `C:/Users/Dima/Documents/GitHub/investments-calculator/.claude/settings.json`
+- `C:/Users/Dima/Documents/GitHub/Timesheet/.claude/settings.json` (если есть)
+- `C:/Users/Dima/Documents/GitHub/ClipboardHistory/.claude/settings.json` (если есть)
+
+CLAUDE.md:
+- `C:/Users/Dima/Documents/GitHub/claude-code-config/global/CLAUDE.md` §9 Global Hooks
 
 Прочитай секцию "Last Audit" внизу этого файла — это контекст прошлого аудита.
 
 ### 2. Запусти тесты
 ```bash
+# Глобальные тесты (35 tests)
+bash ~/.claude/hooks/test-hooks.sh
+
+# Проектные тесты investments-calculator (106 tests)
 cd /c/Users/Dima/Documents/GitHub/investments-calculator && bash .claude/hooks/test-hooks.sh
 ```
 
 ### 3. Test coverage
-- Для КАЖДОГО regex/pattern в хуках — есть ли тест в test-hooks.sh? Если нет — добавь.
+- Для КАЖДОГО regex/pattern в хуках — есть ли тест? Если нет — добавь.
+- Новые тесты для глобальных хуков → в global/hooks/test-hooks.sh
+- Новые тесты для проектных хуков → в .claude/hooks/test-hooks.sh того проекта
 
 ### 4. Consistency check
-- Глобальные хуки (symlink targets в `claude-code-config/global/hooks/`) ИДЕНТИЧНЫ проектным копиям в investments-calculator `.claude/hooks/` для block-dangerous-git, block-protected-files, auto-lint-python? `diff` каждую пару.
 - JSON extraction pattern одинаковый во ВСЕХ hook файлах?
-- settings.json: глобальные хуки НЕ дублируются в проектных settings? (double-fire)
-- Timesheet и ClipboardHistory хуки используют тот же JSON extraction?
-- Cross-project feature drift: Timesheet/ClipboardHistory pre-commit-review.sh будут отличаться от investments-calculator (у inv-calc есть ruff+pytest+tsc, у Timesheet только tsc, у ClipboardHistory только ruff). Это by design — отметь различия но не выравнивай.
+- Symlinks: `ls -la ~/.claude/hooks/` — все файлы симлинки на claude-code-config/global/hooks/?
 
-### 5. Для КАЖДОГО хука
+### 5. Double-fire prevention
+Архитектура: глобальные и проектные хуки fire на одно событие. Предотвращение:
+- **pre-commit-review.sh (global)**: скипает если `.claude/hooks/pre-commit-review.sh` существует в проекте
+- **auto-lint-typescript.sh (global)**: скипает если `.claude/hooks/auto-lint-typescript.sh` существует в проекте
+- **auto-lint-python.sh (global)**: НЕ имеет double-fire prevention (ни один проект не override)
+- **ripple-check.sh (global)**: НЕ имеет double-fire prevention (ни один проект не override)
+- **block-dangerous-git.sh, block-protected-files.sh**: НЕ имеет (ни один проект не override)
+
+Проверь:
+- investments-calculator: global pre-commit/auto-lint-ts ДОЛЖНЫ скипаться (есть проектные)
+- Timesheet: глобальный pre-commit/auto-lint-ts ДОЛЖНЫ скипаться (есть проектные)?
+- ClipboardHistory: глобальный pre-commit ДОЛЖЕН скипаться (есть проектный)?
+- Проекты БЕЗ своих хуков: глобальные ДОЛЖНЫ работать
+- Нет ли проекта который получает double-fire? Проверь реально.
+
+### 6. Для КАЖДОГО хука
 - **3 false positives**: легитимные команды которые ложно блокируются — промоделируй regex
 - **3 false negatives**: опасные команды которые проходят — промоделируй regex
 - **Edge cases**: кавычки в JSON, chained commands (&&, ;, |), Windows paths
 
-### 6. WHY-комментарии
+### 7. Ripple check специфика
+- Тест с файлами содержащими regex-спецсимволы в имени (app.test.tsx, module+utils.ts)
+- Тест что grep -Fv корректно фильтрует basename (а не regex)
+- Тест что timeout 3 работает (симулировать медленный grep сложно — как минимум убедись что таймаут не ломает exit 0)
+- Тест что MAX_WARNINGS=5 реально ограничивает вывод
+
+### 8. WHY-комментарии
 - Каждый regex имеет WHY?
 - Нет WHAT-комментариев (объясняющих как работает bash)?
 - Не раздуто? (1 WHY на decision, не 1 на строку)
 
-### 7. Пробелы
+### 9. Пробелы
 - Что в CLAUDE.md декларативное но не enforced хуками? Стоит ли enforce?
 
 ## Формат ответа
@@ -66,6 +100,7 @@ cd /c/Users/Dima/Documents/GitHub/investments-calculator && bash .claude/hooks/t
 ## ТЕСТЫ
 ## TEST COVERAGE (regex без тестов)
 ## CONSISTENCY
+## DOUBLE-FIRE
 ## БАГИ [файл:строка → проблема → фикс]
 ## FALSE POSITIVES / NEGATIVES [таблица]
 ## КОММЕНТАРИИ
@@ -79,10 +114,13 @@ cd /c/Users/Dima/Documents/GitHub/investments-calculator && bash .claude/hooks/t
 - Применяй ВСЕ фиксы сам, не спрашивай
 - WHY к новому коду: 1 WHY на decision
 - Запусти тесты после правок
-- Обнови CLAUDE.md Hook Behavior секцию если поведение хуков изменилось
+- Обнови CLAUDE.md §9 Hook Behavior секцию если поведение хуков изменилось (в обоих: global CLAUDE.md и investments-calculator CLAUDE.md)
 - НЕ добавляй новые хуки без явного запроса
-- ВАЖНО: файлы в ~/.claude/hooks/ это СИМЛИНКИ на claude-code-config/global/hooks/. Правь оригиналы в claude-code-config/global/hooks/, не симлинки. Проектные копии в investments-calculator/.claude/hooks/ тоже обнови (должны быть идентичны глобальным для трёх общих хуков).
-- После всех правок: `cd ~/Documents/GitHub/claude-code-config && git add -A && git commit -m "audit fixes" && git push`
+- ВАЖНО: файлы в ~/.claude/hooks/ это СИМЛИНКИ на claude-code-config/global/hooks/. Правь оригиналы в claude-code-config/global/hooks/, не симлинки.
+- Проектные хуки (investments-calculator/.claude/hooks/) — это ОТДЕЛЬНЫЕ файлы, не симлинки. Они override глобальные. Правь их напрямую.
+- После всех правок:
+  1. `cd ~/Documents/GitHub/claude-code-config && git add -A && git commit -m "audit fixes" && git push`
+  2. Если правил проектные хуки: коммит в том проекте тоже
 - **Перезапиши секцию Last Audit** внизу этого файла своими находками (не дописывай — заменяй).
 ```
 
@@ -90,15 +128,18 @@ cd /c/Users/Dima/Documents/GitHub/investments-calculator && bash .claude/hooks/t
 
 ## Last Audit
 
-**Date:** 2026-03-15 | **Tests:** 106/106 PASS
+**Date:** 2026-03-15 | **Global tests:** 35/35 PASS | **Project tests (inv-calc):** 106/106 PASS
 
-**Found & fixed:**
-1. `.env` pattern `[a-z]+` missed uppercase variants (`.env.PRODUCTION`) → `[a-zA-Z0-9]+`
-2. `git checkout/restore .` pattern `(-- )?\.` missed refs before dot (`HEAD .`, `--source=HEAD~1 .`) → `\b.*\s\.`
-3. Stale comment in block-protected-files.sh, missing JSON unescape in auto-lint-python.sh + block-protected-files.sh
-4. 8 tests added (78→86): double-force flag, uppercase .env, checkout HEAD ., restore --source
+**Architecture:**
+- 6 global hooks (block-dangerous-git, block-protected-files, pre-commit-review, auto-lint-python, auto-lint-typescript, ripple-check)
+- pre-commit-review (global) = universal stack auto-detection (Python/TS/Go/Rust/Node)
+- investments-calculator overrides: pre-commit-review.sh, auto-lint-typescript.sh (project-specific)
+- Double-fire prevention via `[ -f ".claude/hooks/<name>.sh" ] && exit 0` in global hooks
+
+**Found & fixed (this session):**
+1. ripple-check.sh: `grep -v` → `grep -Fv` — dots in basenames like `app.test.tsx` were regex wildcards
+2. pre-commit-review.sh: Phase 2 PASSED tracking now reflects actually-run checks (not all possible checks)
+3. Previous audit fixes still valid: uppercase .env, checkout HEAD ., restore --source patterns
 
 **Known false positives (marker bypass):** `git restore --staged .`, `git checkout --ours .`
-**Known false negatives (by design):** variable expansion, nested scripts, split rm flags, git -c flag
-
-**Also done:** pytest added to pre-commit Phase 1 (blocking) in investments-calculator
+**Known false negatives (by design):** variable expansion, nested scripts, split rm flags, git -C flag

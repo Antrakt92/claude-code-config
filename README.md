@@ -4,12 +4,14 @@ A hardening framework for [Claude Code](https://docs.anthropic.com/en/docs/claud
 
 **The problem:** Claude Code says "done" without running tests. Commits `: any` types and `console.log`. Changes a function and leaves 4 callers broken. Runs `git push --force` and destroys remote history. You won't catch any of this — because you never read the code.
 
-**The solution:** 7 shell hooks that automatically block bad commits, catch destructive commands, and warn about forgotten callers. 10 behavioral rules in CLAUDE.md that shape how the AI thinks — before it makes mistakes, not after. A memory system that makes it learn from corrections across sessions.
+**The solution:** 7 shell hooks that automatically block bad commits, catch destructive commands, and warn about forgotten callers. 10 behavioral rules that shape how the AI thinks — before it makes mistakes, not after. A memory system that makes it learn from corrections across sessions.
+
+Everything installs into `~/.claude/` (global config) — works identically across all your projects, on every `claude` session. Your existing project-level `CLAUDE.md` files stay untouched. Zero interference, pure upgrade.
 
 Three layers working together:
 
-- **Behavioral rules** (CLAUDE.md) — "re-read the file before editing", "search ALL callers before changing a function", "stop and rethink after 3 failed attempts"
-- **Automated enforcement** (hooks) — every commit must pass linters, tests, and diff analysis. No bypass. Destructive commands blocked before execution
+- **Behavioral rules** (global `~/.claude/CLAUDE.md`) — "re-read the file before editing", "search ALL callers before changing a function", "stop and rethink after 3 failed attempts". Applied to every project automatically.
+- **Automated enforcement** (global hooks in `~/.claude/hooks/`) — every commit must pass linters, tests, and diff analysis. No bypass. Destructive commands blocked before execution. Fires in every project.
 - **Persistent learning** (memory) — AI logs mistakes and applies corrections in future sessions
 
 Not a plugin. Not a skill. Plugins add new tools. **claude-senior** makes the AI better at using the tools it already has.

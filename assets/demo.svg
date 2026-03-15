@@ -1,115 +1,143 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520">
   <style>
-    @keyframes scene1 { 0%,30% { opacity: 1 } 33%,100% { opacity: 0 } }
-    @keyframes scene2 { 0%,33% { opacity: 0 } 36%,63% { opacity: 1 } 66%,100% { opacity: 0 } }
-    @keyframes scene3 { 0%,66% { opacity: 0 } 69%,97% { opacity: 1 } 100% { opacity: 0 } }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
-    .terminal { font-family: 'Cascadia Code', 'Fira Code', 'SF Mono', 'Consolas', monospace; font-size: 13.5px; }
-    .prompt { fill: #6BCB77; }
-    .cmd { fill: #E8E8E8; }
-    .blocked { fill: #FF6B6B; font-weight: bold; }
-    .success { fill: #6BCB77; font-weight: bold; }
-    .info { fill: #4ECDC4; }
-    .warn { fill: #FFE66D; }
-    .dim { fill: #888; }
-    .white { fill: #E8E8E8; }
-    .marker { fill: #C9B1FF; }
+    .bg { fill: #1e1e2e; }
+    .titlebar { fill: #313244; }
+    .t { font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace; font-size: 13px; }
+    .prompt { fill: #a6e3a1; }
+    .cmd { fill: #cdd6f4; }
+    .blocked { fill: #f38ba8; font-weight: bold; }
+    .warn { fill: #fab387; }
+    .pass { fill: #a6e3a1; }
+    .dim { fill: #6c7086; }
+    .check { fill: #a6e3a1; }
+    .x { fill: #f38ba8; }
+    .title { fill: #bac2de; font-size: 12px; }
+    .dot1 { fill: #f38ba8; }
+    .dot2 { fill: #fab387; }
+    .dot3 { fill: #a6e3a1; }
 
-    .scene1 { animation: scene1 15s infinite; }
-    .scene2 { animation: scene2 15s infinite; }
-    .scene3 { animation: scene3 15s infinite; }
+    .scene1 { animation: fadeIn 0.3s ease 0.5s both; }
+    .s1-l1 { animation: fadeIn 0.2s ease 1.0s both; }
+    .s1-l2 { animation: fadeIn 0.2s ease 1.4s both; }
+    .s1-l3 { animation: fadeIn 0.2s ease 1.7s both; }
+    .s1-l4 { animation: fadeIn 0.2s ease 2.0s both; }
+    .s1-l5 { animation: fadeIn 0.2s ease 2.3s both; }
+    .s1-l6 { animation: fadeIn 0.2s ease 2.6s both; }
+    .s1-l7 { animation: fadeIn 0.2s ease 2.9s both; }
+    .s1-l8 { animation: fadeIn 0.2s ease 3.2s both; }
+    .s1-l9 { animation: fadeIn 0.2s ease 3.6s both; }
+    .s1-l10 { animation: fadeIn 0.2s ease 4.0s both; }
+
+    .scene2 { animation: fadeIn 0.3s ease 5.5s both; }
+    .s2-l1 { animation: fadeIn 0.2s ease 6.0s both; }
+    .s2-l2 { animation: fadeIn 0.2s ease 6.3s both; }
+    .s2-l3 { animation: fadeIn 0.2s ease 6.6s both; }
+    .s2-l4 { animation: fadeIn 0.2s ease 6.9s both; }
+    .s2-l5 { animation: fadeIn 0.2s ease 7.2s both; }
+    .s2-l6 { animation: fadeIn 0.2s ease 7.8s both; }
+
+    .scene3 { animation: fadeIn 0.3s ease 9.0s both; }
+    .s3-l1 { animation: fadeIn 0.2s ease 9.3s both; }
+    .s3-l2 { animation: fadeIn 0.2s ease 9.6s both; }
+    .s3-l3 { animation: fadeIn 0.2s ease 9.9s both; }
   </style>
 
   <!-- Terminal window -->
-  <rect width="820" height="520" rx="10" fill="#1a1b26"/>
+  <rect class="bg" width="820" height="520" rx="10"/>
+  <rect class="titlebar" width="820" height="36" rx="10"/>
+  <rect class="bg" y="26" width="820" height="10"/>
+  <circle cx="20" cy="18" r="6" class="dot1"/>
+  <circle cx="40" cy="18" r="6" class="dot2"/>
+  <circle cx="60" cy="18" r="6" class="dot3"/>
+  <text x="410" y="22" text-anchor="middle" class="title t">claude-senior — pre-commit quality gate</text>
 
-  <!-- Title bar -->
-  <rect width="820" height="36" rx="10" fill="#24283b"/>
-  <rect y="26" width="820" height="10" fill="#24283b"/>
-  <circle cx="20" cy="18" r="6" fill="#ff5f57"/>
-  <circle cx="40" cy="18" r="6" fill="#febc2e"/>
-  <circle cx="60" cy="18" r="6" fill="#28c840"/>
-  <text x="410" y="22" text-anchor="middle" class="terminal dim" font-size="12">claude-senior</text>
-
-  <!-- Scene 1: Pre-commit quality gate (MAIN scene) -->
+  <!-- Scene 1: Commit blocked -->
   <g class="scene1">
-    <text x="20" y="70" class="terminal dim">~/project</text>
-
-    <text x="20" y="100" class="terminal prompt">claude &gt;</text>
-    <text x="110" y="100" class="terminal cmd">git commit -m "feat: add tax calculator"</text>
-
-    <text x="20" y="140" class="terminal info">&#x2501; Phase 1: automated quality checks &#x2501;</text>
-    <text x="20" y="168" class="terminal success">&#x2713; ruff check &#x2014; passed</text>
-    <text x="20" y="188" class="terminal success">&#x2713; pytest tests/ -x &#x2014; 247 passed</text>
-    <text x="20" y="208" class="terminal success">&#x2713; tsc --noEmit &#x2014; passed</text>
-    <text x="20" y="228" class="terminal success">&#x2713; eslint --max-warnings 0 &#x2014; passed</text>
-
-    <text x="20" y="266" class="terminal info">&#x2501; Phase 2: self-review checklist &#x2501;</text>
-    <text x="20" y="294" class="terminal white">1. DIFF: no debug code, no secrets, no console.log</text>
-    <text x="20" y="314" class="terminal white">2. RIPPLE: grep all callers of modified functions</text>
-    <text x="20" y="334" class="terminal white">3. MODELS: entities.py changed? &#x2192; create migration</text>
-    <text x="20" y="354" class="terminal white">4. LEARNINGS: any mistakes worth saving to memory?</text>
-
-    <text x="20" y="392" class="terminal marker">touch /tmp/claude-commit-reviewed-a3f19 &amp;&amp; retry</text>
-
-    <text x="20" y="430" class="terminal dim">AI completes review, touches marker, retries commit...</text>
-    <text x="20" y="458" class="terminal success">&#x2713; Commit successful: feat: add tax calculator</text>
-
-    <text x="20" y="500" class="terminal dim" font-size="11">scene 1/3 &#x2022; auto-cycles every 5s &#x2022; code cannot land without passing all checks</text>
+    <text x="20" y="60" class="t prompt">$</text>
+    <text x="35" y="60" class="t cmd"> git commit -m "feat: add tax calculator"</text>
   </g>
 
-  <!-- Scene 2: Auto-lint in action -->
+  <g class="s1-l1">
+    <text x="20" y="90" class="t blocked">COMMIT BLOCKED — Auto-checks failed (3 files changed, 47 insertions)</text>
+  </g>
+
+  <g class="s1-l2">
+    <text x="20" y="120" class="t dim">─────────────────────────────────────────────────────</text>
+  </g>
+
+  <g class="s1-l3">
+    <text x="20" y="145" class="t x">✗</text>
+    <text x="40" y="145" class="t warn">CONSOLE.LOG FOUND in staged changes:</text>
+  </g>
+  <g class="s1-l4">
+    <text x="40" y="165" class="t dim">+  console.log("tax result:", totalTax);</text>
+  </g>
+
+  <g class="s1-l5">
+    <text x="20" y="195" class="t x">✗</text>
+    <text x="40" y="195" class="t warn">TYPE 'any' FOUND in staged TS changes:</text>
+  </g>
+  <g class="s1-l6">
+    <text x="40" y="215" class="t dim">+  function processData(input: any): any {</text>
+  </g>
+
+  <g class="s1-l7">
+    <text x="20" y="245" class="t x">✗</text>
+    <text x="40" y="245" class="t warn">TODO/FIXME found in staged changes:</text>
+  </g>
+  <g class="s1-l8">
+    <text x="40" y="265" class="t dim">+  // TODO: handle edge case for leap years</text>
+  </g>
+
+  <g class="s1-l9">
+    <text x="20" y="295" class="t dim">─────────────────────────────────────────────────────</text>
+  </g>
+  <g class="s1-l10">
+    <text x="20" y="320" class="t blocked">Fix the issues above, then retry commit.</text>
+  </g>
+
+  <!-- Scene 2: AI fixes and retries -->
   <g class="scene2">
-    <text x="20" y="70" class="terminal dim">~/project</text>
-
-    <text x="20" y="100" class="terminal prompt">claude &gt;</text>
-    <text x="110" y="100" class="terminal cmd">Edit backend/app/services/tax_calculator.py</text>
-
-    <text x="20" y="140" class="terminal dim">AI writes new calculate_gains() function...</text>
-    <text x="20" y="160" class="terminal dim">File saved.</text>
-
-    <text x="20" y="200" class="terminal info">&#x2501; PostToolUse: auto-lint-python.sh &#x2501;</text>
-    <text x="20" y="228" class="terminal dim">$ ruff check --fix tax_calculator.py</text>
-    <text x="20" y="248" class="terminal dim">$ ruff format tax_calculator.py</text>
-
-    <text x="20" y="286" class="terminal warn">AUTO-LINT: Ruff reformatted tax_calculator.py</text>
-    <text x="20" y="306" class="terminal warn">Re-read the file before your next edit.</text>
-
-    <text x="20" y="344" class="terminal dim">AI automatically re-reads the formatted file...</text>
-    <text x="20" y="372" class="terminal success">&#x2713; File re-read. Continuing with next edit.</text>
-
-    <text x="20" y="412" class="terminal dim">Same flow for TypeScript:</text>
-    <text x="20" y="432" class="terminal white">auto-lint-typescript.sh &#x2192; eslint --fix &#x2192; re-read</text>
-
-    <text x="20" y="500" class="terminal dim" font-size="11">scene 2/3 &#x2022; auto-cycles every 5s &#x2022; formatting happens automatically, zero friction</text>
+    <text x="20" y="355" class="t dim">... AI fixes all 3 issues ...</text>
   </g>
 
-  <!-- Scene 3: Safety net -->
-  <g class="scene3">
-    <text x="20" y="70" class="terminal dim">~/project</text>
+  <g class="s2-l1">
+    <text x="20" y="380" class="t prompt">$</text>
+    <text x="35" y="380" class="t cmd"> git commit -m "feat: add tax calculator"</text>
+  </g>
 
-    <text x="20" y="100" class="terminal prompt">claude &gt;</text>
-    <text x="110" y="100" class="terminal cmd">Let me clean up the old source files...</text>
+  <g class="s2-l2">
+    <text x="20" y="405" class="t check">✓</text>
+    <text x="40" y="405" class="t pass">ruff check passed</text>
+  </g>
+  <g class="s2-l3">
+    <text x="20" y="425" class="t check">✓</text>
+    <text x="40" y="425" class="t pass">pytest 357 passed</text>
+  </g>
+  <g class="s2-l4">
+    <text x="20" y="445" class="t check">✓</text>
+    <text x="40" y="445" class="t pass">tsc --noEmit passed</text>
+  </g>
+  <g class="s2-l5">
+    <text x="20" y="465" class="t check">✓</text>
+    <text x="40" y="465" class="t pass">eslint --max-warnings 0 passed</text>
+  </g>
 
-    <text x="20" y="130" class="terminal dim">$ rm -rf src/</text>
+  <g class="s2-l6">
+    <text x="20" y="495" class="t pass">[main a1b2c3d] feat: add tax calculator</text>
+  </g>
 
-    <text x="20" y="168" class="terminal blocked">BLOCKED: rm -rf can permanently delete source files.</text>
-    <text x="20" y="188" class="terminal blocked">Verify the target directory is correct.</text>
-
-    <text x="20" y="226" class="terminal dim">If user explicitly requested this:</text>
-    <text x="20" y="246" class="terminal marker">touch /tmp/claude-dangerous-op-28491-73621 &amp;&amp; retry</text>
-
-    <text x="20" y="284" class="terminal info">&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;&#x2501;</text>
-    <text x="20" y="312" class="terminal warn">&#x26A0; Also blocked by this system:</text>
-
-    <text x="20" y="342" class="terminal white">&#x2022; git push --force       &#x2022; git reset --hard</text>
-    <text x="20" y="362" class="terminal white">&#x2022; git clean -f            &#x2022; git checkout .</text>
-    <text x="20" y="382" class="terminal white">&#x2022; git branch -D           &#x2022; git stash drop/clear</text>
-    <text x="20" y="402" class="terminal white">&#x2022; alembic downgrade       &#x2022; echo x &gt; .env</text>
-    <text x="20" y="422" class="terminal white">&#x2022; Edit/Write to .env*     &#x2022; Edit lock files</text>
-
-    <text x="20" y="460" class="terminal success">&#x2713; rm -rf node_modules/  →  allowed (build artifact)</text>
-
-    <text x="20" y="500" class="terminal dim" font-size="11">scene 3/3 &#x2022; auto-cycles every 5s &#x2022; safety net for catastrophic mistakes</text>
+  <!-- Scene 3: Ripple check (sidebar) -->
+  <g class="s3-l1">
+    <text x="480" y="405" class="t warn">RIPPLE CHECK: calculate_tax used in:</text>
+  </g>
+  <g class="s3-l2">
+    <text x="490" y="425" class="t dim">calculate_tax → api.py:42 views.py:18</text>
+  </g>
+  <g class="s3-l3">
+    <text x="490" y="445" class="t dim">Did you update all callers?</text>
   </g>
 </svg>

@@ -119,6 +119,9 @@ These are the failure modes that keep Claude Code as a junior — and what claud
 | **Change Size Rule** | "5+ files → write a plan first" — prevents lost overview |
 | **Uncertainty Disclosure** | "If unsure, say so explicitly" — prevents false confidence |
 | **Verification Rule** | "Never say 'done' without fresh test evidence" — prevents shipping broken code |
+| **File Rename/Move Rule** | "Grep the old path after renaming" — prevents broken imports |
+| **Regression Test First** | "Write failing test before fixing bug" — prevents unverified fixes |
+| **Context Recovery Protocol** | "After compression: git diff, re-read files, check todos" — prevents stale edits |
 
 Plus: autonomy guidelines, code style for AI readability, security rules, self-improvement protocol.
 

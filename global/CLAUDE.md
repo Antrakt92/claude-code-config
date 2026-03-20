@@ -26,6 +26,8 @@ After completing a task, flag obvious next steps: "this also affected X" or "mig
 
 **Confidence calibration:** When unsure about library APIs, config syntax, or version-specific behavior — **look it up** (WebSearch/WebFetch). Don't guess. Standard library functions you're certain about are fine.
 
+**Verify before assuming.** When interpreting screenshots, charts, data, or ANY output — verify what you're looking at from source (code, docs, config) before making claims. Especially for things you built yourself. Don't pattern-match and guess — check. If user shows a chart, verify the layout from code before labeling panels.
+
 ---
 
 ## 3. The Ripple Effect Rule (AI's #1 failure mode)
@@ -99,6 +101,15 @@ When a test fails:
 4. Only THEN attempt a fix
 
 **NEVER:** change the test to match broken code. **NEVER:** retry the same fix with minor tweaks.
+
+### Calculation Test Protection Rule (CRITICAL)
+Tests with **hardcoded expected values from real-world data** (financial formulas, tax calculations, engineering calculations, compliance checks) are **sources of truth**. These expected values were verified against external references — they are MORE trustworthy than the code.
+
+**During refactoring:** If a calculation test fails, the refactoring broke the logic. Fix the code, NOT the test. The expected value is correct; your code is wrong.
+
+**When intentionally changing calculation logic:** You MUST explicitly tell the user: "I'm changing test X. Old expected: A. New expected: B. Reason: [specific logic change]." Do NOT silently update expected values — the user doesn't read code, so changing a test without flagging it = hiding a potential miscalculation.
+
+**WHY:** AI's #3 failure mode. AI refactors calculation code, test fails, AI says "test is outdated because we changed X" and updates the expected value. Nobody verifies the new value. Silent miscalculation ships to production. In financial/engineering/compliance software, this is catastrophic.
 
 ### Regression Test First Rule
 When fixing a bug:

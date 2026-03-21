@@ -55,6 +55,9 @@ After renaming or moving ANY file:
 
 ## 4. Verification & Resilience
 
+### NEVER Discard Uncommitted Changes (CRITICAL)
+Working directory may contain changes from other sessions, windows, or manual edits. **NEVER** run `git checkout -- <file>`, `git restore <file>`, `git clean`, or anything that discards uncommitted work. When committing, only `git add` the specific files YOU changed — leave everything else untouched. If unsure whether a modified file should be included, ASK. Even if a diff looks like pure whitespace/line-ending noise, it may contain real work.
+
 **NEVER say "done"/"fixed"/"works" without FRESH evidence from THIS session.**
 Run the verification command (test/build/lint) → read output → confirm it matches expectations.
 Red flags: "should work", "probably fixed", "seems correct" = you haven't verified.

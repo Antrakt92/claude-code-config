@@ -63,17 +63,13 @@ Fix issues silently before presenting. Don't show broken code.
 **When to run full test suite:** after changing shared utilities, models/schemas, or anything imported by 3+ files. Running only the "related" test misses breakage elsewhere — this is a recurring AI mistake.
 
 ### Read-Before-Edit Rule (MANDATORY)
-Before EVERY Edit tool call: if you haven't Read the target file in the last 3 tool calls, **Read it first**. No exceptions.
-**WHY:** AI reads a file, does 10 other things, then edits by memory. File may have changed (auto-lint reformatted, earlier edit changed line numbers). Edit fails, AI wastes 2-3 retries. This is the #2 AI failure mode.
+Re-read file if >3 tool calls since last Read. Auto-lint or earlier edits may have changed content/line numbers.
 
 ### Change Size Rule
 If your change touches **>5 files**: STOP and write a plan (TodoWrite) before continuing.
-**WHY:** Large changes without a plan = missed files, broken imports, forgotten tests. AI loses overview.
 
 ### Uncertainty Disclosure Rule
-If you're unsure about ANY aspect of your implementation: **say so explicitly**.
-"I'm not sure if X handles Y correctly" is better than silently guessing wrong.
-**WHY:** AI's default is false confidence. Actively counter it. User can course-correct early.
+If you're unsure about ANY aspect of your implementation: **say so explicitly**. "I'm not sure if X handles Y correctly" > silently guessing wrong.
 
 ### Context Recovery Protocol
 After context compression (system message about it):
@@ -81,8 +77,6 @@ After context compression (system message about it):
 2. **Re-read any file** you're actively editing — your memory of its contents is now unreliable
 3. **Check TodoWrite** — your task list survives compression, use it to re-orient
 4. **Do NOT continue editing from memory** — compression may have dropped critical details
-
-**WHY:** After compression, AI continues editing as if nothing happened, but its "memory" of file contents is now partial. Causes wrong old_string in Edit calls, stale logic, forgotten requirements.
 
 One task fully complete before the next.
 
@@ -112,13 +106,7 @@ Tests with **hardcoded expected values from real-world data** (financial formula
 **WHY:** AI's #3 failure mode. AI refactors calculation code, test fails, AI says "test is outdated because we changed X" and updates the expected value. Nobody verifies the new value. Silent miscalculation ships to production. In financial/engineering/compliance software, this is catastrophic.
 
 ### Regression Test First Rule
-When fixing a bug:
-1. **Write a failing test** that reproduces the bug
-2. **Run it** — confirm it fails for the right reason
-3. **Fix the code**
-4. **Run the test again** — confirm it passes
-
-**WHY:** Without a regression test, AI "fixes" the bug but has no proof it was broken or that the fix works. The bug returns next time AI touches that code.
+When fixing a bug: write failing test → confirm it fails → fix code → confirm it passes. No fix without proof.
 
 **Anti-patterns:** repeating failed approaches with small tweaks, multiple unrelated changes at once.
 
@@ -126,8 +114,7 @@ When fixing a bug:
 
 ## 5. Scope & Simplicity
 
-- **Follow existing patterns** — match naming, structure, error handling of adjacent code
-- **Use existing utilities** — search `utils/`, `hooks/`, `helpers/`, `constants/` before writing new
+- **Follow existing patterns** — match naming, structure, error handling of adjacent code. Search entire codebase (not just utils/) for existing implementations before writing new logic.
 - **3+ rule**: Extract to utility only when pattern repeats 3+ times. Two occurrences = copy is OK.
 - **Catch specific exceptions** — never bare `except:`. Log meaningful context. Fail loudly on unexpected errors.
 - **If you see a problem** while working — note it at end of response, don't fix unsolicited (unless security)
@@ -149,13 +136,9 @@ Code is written by AI, for AI to read later. 100% AI-read, never human.
 
 **Avoid implicit state.** Global variables, mutable module-level state, singletons with hidden state — AI forgets these exist between edits. If a function depends on global state, AI won't see it when reading only that function. Prefer explicit parameter passing.
 
-**Before writing new logic, search for existing implementations.** Not just utils/ — also business logic, constants, type definitions, validation rules. If similar logic exists, reuse or extend it. Two copies of the same rule = future AI fixes one and forgets the other. This is the #1 cause of silent bugs.
-
 **Never hardcode values that could change or repeat.** Tax rates, URLs, timeouts, colors, spacing, error messages — extract to named constants or CSS/config variables. Hardcoded `0.33` in 5 places = AI updates one, forgets 4. Single source of truth: one constant, many references.
 
 **Update comments when changing the code they describe.** Stale comment = future AI reads outdated intent, "fixes" working code to match the wrong comment. If you change logic, check the comment above it.
-
-**Follow the existing pattern, not a "better" one.** If the codebase returns `None` on not-found, don't return an exception in your new function. Inconsistent patterns = future AI guesses wrong which convention to follow.
 
 **Think through edge cases before writing.** Null, empty list, zero, negative, boundary values, duplicate input. AI defaults to happy-path code — no reviewer will catch missing guards.
 

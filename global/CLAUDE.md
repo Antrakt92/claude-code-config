@@ -113,22 +113,10 @@ When fixing a bug: write failing test → confirm it fails → fix code → conf
 
 **Anti-patterns:** repeating failed approaches with small tweaks, multiple unrelated changes at once.
 
-### Edge Case Checklist Rule (AI's #2 failure mode)
+### Edge Case Checklist (apply WHILE writing, not after)
+For every new function/endpoint before marking done: null/None inputs, empty collections, zero/negative values, boundary values, wrong `user_id` auth, FK delete order, nullable type casts (`float(x)` when x may be None/NaN), concurrent requests.
 
-Before marking ANY new function, endpoint, or feature as done — run through this list mentally:
-
-- **Null/None inputs** — what if a required field is missing or None?
-- **Empty collections** — empty list, zero results, empty dict
-- **Zero and negative numbers** — division by zero, negative amounts, zero quantities
-- **Boundary values** — first/last item, exactly-at-limit, off-by-one
-- **Unauthorized access** — what if wrong `user_id` calls this? ownership check?
-- **FK constraints** — does delete order matter? will this orphan rows?
-- **Nullable type coercion** — casting `float(x)` when x might be None or NaN?
-- **Concurrent access** — two requests hitting this simultaneously?
-
-**Do this WHILE writing, not in a separate "find bugs" pass.**
-
-**WHY:** Pre-commit tests pass because there are no tests for the new code yet — the tests only cover what existed before. "Find bugs" commands find real serious bugs precisely because this checklist was skipped during implementation. Every bug-hunt cycle that finds a crash or security issue = edge case thinking that should have happened upfront. Each round of "find bugs" after a feature = time that could be saved by 2 extra minutes of defensive thinking during writing.
+**WHY:** Pre-commit tests pass on new code because no tests exist yet. Serious bugs found in post-feature "find bugs" passes = this checklist was skipped during writing.
 
 ---
 

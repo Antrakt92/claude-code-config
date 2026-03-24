@@ -130,7 +130,7 @@ For every new function/endpoint before marking done: null/None inputs, empty col
 ### Bug Prioritization
 - **Fix immediately:** Security issues, incorrect calculations, crashes
 - **Note in ROADMAP/TODO:** Performance, code smell, minor UX
-- **Ignore:** Theoretical edge cases, style preferences
+- **Ignore:** Style preferences, edge cases provably impossible given system invariants
 
 ---
 
@@ -147,8 +147,6 @@ Code is written by AI, for AI to read later. 100% AI-read, never human.
 **Never hardcode values that could change or repeat.** Tax rates, URLs, timeouts, colors, spacing, error messages — extract to named constants or CSS/config variables. Hardcoded `0.33` in 5 places = AI updates one, forgets 4. Single source of truth: one constant, many references.
 
 **Update comments when changing the code they describe.** Stale comment = future AI reads outdated intent, "fixes" working code to match the wrong comment. If you change logic, check the comment above it.
-
-**Think through edge cases before writing.** Null, empty list, zero, negative, boundary values, duplicate input. AI defaults to happy-path code — no reviewer will catch missing guards.
 
 **Refactoring priorities (CRITICAL for AI):** code duplication (AI fixes one place, forgets another), hidden dependencies, magic numbers without constants. Don't refactor just for "cleanliness" — only fix what causes AI errors.
 

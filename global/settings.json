@@ -54,18 +54,6 @@
     ],
     "defaultMode": "bypassPermissions"
   },
-  "enabledPlugins": {
-    "context7@claude-plugins-official": true,
-    "playwright@claude-plugins-official": false,
-    "coderabbit@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
-    "pyright-lsp@claude-plugins-official": true,
-    "commit-commands@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true,
-    "semgrep@claude-plugins-official": true,
-    "claude-code-setup@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true
-  },
   "hooks": {
     "PreToolUse": [
       {
@@ -111,7 +99,21 @@
       }
     ]
   },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true,
+    "playwright@claude-plugins-official": false,
+    "coderabbit@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "semgrep@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true
+  },
+  "effortLevel": "high",
   "autoUpdatesChannel": "latest",
+  "autoMemoryEnabled": true,
   "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "max"
+  "autoDreamEnabled": true
 }

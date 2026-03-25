@@ -130,7 +130,7 @@ For every new function/endpoint before marking done: null/None inputs, empty col
 ### Bug Prioritization
 - **Fix immediately:** Security issues, incorrect calculations, crashes
 - **Note in ROADMAP/TODO:** Performance, code smell, minor UX
-- **Ignore:** Style preferences, edge cases provably impossible given system invariants
+- **Ignore:** Style preferences, edge cases provably impossible given system invariants (not the same as skipping the Edge Case Checklist — that applies during writing)
 
 ---
 

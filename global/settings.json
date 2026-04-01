@@ -111,9 +111,9 @@
     "claude-code-setup@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true
   },
-  "effortLevel": "high",
+  "effortLevel": "max",
   "autoUpdatesChannel": "latest",
   "autoMemoryEnabled": true,
-  "skipDangerousModePermissionPrompt": true,
-  "autoDreamEnabled": true
+  "autoDreamEnabled": true,
+  "skipDangerousModePermissionPrompt": true
 }

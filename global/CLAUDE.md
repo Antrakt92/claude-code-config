@@ -28,6 +28,16 @@ After completing a task, flag obvious next steps: "this also affected X" or "mig
 
 **Verify before assuming.** When interpreting screenshots, charts, data, or ANY output — verify what you're looking at from source (code, docs, config) before making claims. Especially for things you built yourself. Don't pattern-match and guess — check. If user shows a chart, verify the layout from code before labeling panels.
 
+### Pre-Implementation Thinking (MANDATORY)
+Before writing ANY new code — pause and answer:
+1. **Reuse** — does this (or something close) already exist? Search before creating.
+2. **Placement** — where does this logically belong? Match existing structure.
+3. **Style** — how do adjacent files handle the same pattern? Match, don't invent.
+4. **Optimization** — is there a simpler/faster approach than the first one that comes to mind?
+5. **Debt check** — will this create duplication, inconsistency, or something to fix later?
+
+Don't rush to produce working code. The first approach that works is rarely the best one.
+
 ---
 
 ## 3. The Ripple Effect Rule (AI's #1 failure mode)

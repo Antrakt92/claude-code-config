@@ -81,6 +81,26 @@ Re-read file if >3 tool calls since last Read. Auto-lint or earlier edits may ha
 ### Change Size Rule
 If your change touches **>5 files**: STOP and write a plan (TodoWrite) before continuing.
 
+### Sub-Agent Decomposition Rule
+Sub-agents are nearly free (prompt caching). Use them aggressively for parallel work.
+
+**When to decompose into sub-agents:**
+- Task touches >5 independent files/areas — parallelize
+- Need to search + implement simultaneously — one agent explores, another implements
+- Multiple independent changes (e.g., backend + frontend + tests) — one agent per area
+- Large refactor across many files — one agent per logical group
+
+**How to use sub-agents effectively:**
+- **Small scope**: each agent gets ONE clear task, not a vague "help with this"
+- **Independent work**: don't give two agents the same file — they'll conflict
+- **Replace, don't retry**: if an agent gets stuck, spawn a fresh one with better context instead of sending more messages
+- **Verify after assembly**: after parallel agents finish, run full test suite — individual agents can't see each other's changes
+
+**Anti-patterns:**
+- One monolithic agent doing everything sequentially when work is parallelizable
+- Giving a sub-agent a task that requires the full conversation context (it doesn't have it)
+- Using sub-agents for trivial tasks that take <30 seconds to do directly
+
 ### Uncertainty Disclosure Rule
 If you're unsure about ANY aspect of your implementation: **say so explicitly**. "I'm not sure if X handles Y correctly" > silently guessing wrong.
 

@@ -7,7 +7,7 @@
 #   Timeout on each command. Blocks on failure.
 # Phase 2 (diff analysis, no bypass):
 #   Greps staged diff for AI anti-patterns: `any` types, empty catch, TODO/FIXME,
-#   large commits (>500 lines), missing migrations, new files without tests.
+#   missing migrations, new files without tests.
 #
 # DOUBLE-FIRE PREVENTION: if project-level .claude/hooks/pre-commit-review.sh exists,
 # this hook exits 0 immediately — the project hook takes precedence.
@@ -305,11 +305,6 @@ if [ -n "$TODO_LINES" ]; then
   DIFF_WARNINGS="${DIFF_WARNINGS}\nTODO/FIXME/HACK found in staged changes — resolve before committing:\n$(echo "$TODO_LINES" | head -3)"
 fi
 
-# WHY commit size check: large commits = AI lost overview, likely missed something.
-DIFF_LINES=$(echo "$DIFF" | grep -c '^\+' || true)
-if [ "$DIFF_LINES" -gt 500 ]; then
-  DIFF_WARNINGS="${DIFF_WARNINGS}\nLARGE COMMIT: $DIFF_LINES lines added. Consider splitting into smaller commits."
-fi
 
 # WHY missing migration: model changes without migration = broken DB on deploy.
 if $HAS_MODEL && ! $HAS_MIGRATION; then

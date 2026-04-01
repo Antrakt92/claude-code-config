@@ -108,7 +108,7 @@ These are the failure modes that keep Claude Code as a junior — and what claud
 
 ## Validated by Anthropic's own architecture
 
-In March 2026, Claude Code's full source was [accidentally leaked](https://www.reddit.com/r/ClaudeAI/comments/1jmu6i8/claude_code_source_code_leaked/) via an npm source map. The leak revealed that **claude-senior independently arrived at many of the same patterns Anthropic uses internally** — before the leak made them public.
+In March 2026, Claude Code's full source was accidentally leaked via an npm source map. The leak revealed that **claude-senior independently arrived at many of the same patterns Anthropic uses internally** — before the leak made them public.
 
 | Capability | Anthropic (internal) | claude-senior |
 |-----------|---------------------|---------------|

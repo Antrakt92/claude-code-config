@@ -6,7 +6,7 @@ Hardening framework for [Claude Code](https://docs.anthropic.com/en/docs/claude-
 
 You won't catch any of this — because you never read the code.
 
-**The solution:** 7 shell hooks and 10 behavioral rules that install into `~/.claude/` and work across all your projects. Every commit is quality-gated. Every destructive command is blocked. Every file edit triggers a ripple check.
+**The solution:** 6 shell hooks and 16 behavioral rules that install into `~/.claude/` and work across all your projects. Every commit is quality-gated. Every destructive command is blocked. Every file edit triggers a ripple check.
 
 <p align="center">
   <a href="assets/hero-v4.svg">
@@ -106,21 +106,46 @@ These are the failure modes that keep Claude Code as a junior — and what claud
 | **Destructive commands** | `git push --force`, `rm -rf` | `block-dangerous-git.sh` intercepts before execution |
 | **Loop-and-tweak** | Retries same failing approach 5 times | 3-Strike Rule: stop, re-read, try opposite approach |
 
+## Validated by Anthropic's own architecture
+
+In March 2026, Claude Code's full source was [accidentally leaked](https://www.reddit.com/r/ClaudeAI/comments/1jmu6i8/claude_code_source_code_leaked/) via an npm source map. The leak revealed that **claude-senior independently arrived at many of the same patterns Anthropic uses internally** — before the leak made them public.
+
+| Capability | Anthropic (internal) | claude-senior |
+|-----------|---------------------|---------------|
+| **Pre-commit quality gate** | Phase 1 linters + Phase 2 diff analysis | Same — `pre-commit-review.sh` with stack auto-detection |
+| **Destructive command blocking** | Permission system with allow/deny rules | Same — `block-dangerous-git.sh` intercepts before execution |
+| **Ripple effect detection** | System prompt awareness of caller impact | `ripple-check.sh` — greps usages after every edit |
+| **Memory across sessions** | Persistent memory + unreleased "Dream" consolidation | `CLAUDE.md` + project memory files with improvement logs |
+| **Auto-formatting on edit** | Built-in formatters | `auto-lint-python.sh` + `auto-lint-typescript.sh` with forced re-read |
+| **Behavioral rules via system prompt** | 11-step prompt pipeline with layered instructions | `CLAUDE.md` with 16 rules injected every session |
+| **Sub-agent parallelism** | Coordinator mode (multi-agent swarm) | Sub-Agent Decomposition Rule + prompt caching guidance |
+| **Anti-distillation** | Fake tool definitions as poison pills | — |
+| **Dream (memory consolidation)** | Background agent consolidates memory during idle time | — (waiting for public release) |
+| **Chyros (always-on agent)** | Proactive background monitoring with tick prompts | — |
+
+We cover **7 of 10** core capabilities. The 3 we don't have (anti-distillation, Dream, Chyros) are either not applicable or not yet publicly available.
+
 ## Behavioral rules (CLAUDE.md)
 
-10 sections of behavioral rules, applied to every project:
+16 behavioral rules across 10 sections, applied to every project:
 
 | Rule | What it prevents |
 |------|-----------------|
 | **Ripple Effect Rule** | "Search ALL usages before changing any function" — prevents broken callers |
+| **File Rename/Move Rule** | "Grep the old path after renaming" — prevents broken imports |
+| **Pre-Implementation Thinking** | "Answer 5 questions before writing code: reuse, placement, style, optimization, debt" — prevents reinventing the wheel |
+| **Verify Before Assuming** | "Verify from source before making claims about output" — prevents hallucinated interpretations |
 | **Read-Before-Edit Rule** | "Re-read file if not read in last 3 tool calls" — prevents stale edits |
+| **Change Size Rule** | "5+ files → write a plan first" — prevents lost overview |
+| **Sub-Agent Decomposition** | "5+ independent files → parallelize with sub-agents" — prevents slow sequential work |
+| **Never Discard Changes** | "Never `git checkout .` or `git clean`" — prevents destroying uncommitted work from other sessions |
+| **Verification Rule** | "Never say 'done' without fresh test evidence" — prevents shipping broken code |
 | **3-Strike Rule** | "Stop and rethink after 3 failed attempts" — prevents loop-and-tweak |
 | **Test Failure Recovery** | "Read error → read test → read source → then fix" — prevents guessing |
-| **Change Size Rule** | "5+ files → write a plan first" — prevents lost overview |
-| **Uncertainty Disclosure** | "If unsure, say so explicitly" — prevents false confidence |
-| **Verification Rule** | "Never say 'done' without fresh test evidence" — prevents shipping broken code |
-| **File Rename/Move Rule** | "Grep the old path after renaming" — prevents broken imports |
+| **Calculation Test Protection** | "Hardcoded expected values are sources of truth — fix code, not tests" — prevents silent miscalculations |
 | **Regression Test First** | "Write failing test before fixing bug" — prevents unverified fixes |
+| **Edge Case Checklist** | "Check null, empty, zero, boundary values WHILE writing" — prevents bugs found only in QA |
+| **Uncertainty Disclosure** | "If unsure, say so explicitly" — prevents false confidence |
 | **Context Recovery Protocol** | "After compression: git diff, re-read files, check todos" — prevents stale edits |
 
 Plus: autonomy guidelines, code style for AI readability, security rules, self-improvement protocol.
@@ -129,7 +154,7 @@ Plus: autonomy guidelines, code style for AI readability, security rules, self-i
 
 ```
 ~/.claude/                              GLOBAL — all projects
-├── CLAUDE.md                           10 behavioral rules
+├── CLAUDE.md                           16 behavioral rules
 ├── settings.json                       permissions + hook registration
 └── hooks/
     ├── block-dangerous-git.sh          blocks destructive git/rm/env commands

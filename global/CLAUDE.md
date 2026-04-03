@@ -125,7 +125,15 @@ When a test fails:
 1. Read the **FULL** error message (not just the last line)
 2. Read the **test file** to understand what it expects
 3. Read the **source file** being tested
-4. Only THEN attempt a fix
+4. **Determine fault location** — is the bug in the code or in the test?
+5. Only THEN attempt a fix
+
+**Default assumption: the code is wrong, not the test.** Tests that previously passed are verified behavior. If they break after refactoring, a code change, or a merge — the change introduced a regression until proven otherwise. Investigate the code path first. Only blame the test if you can prove the test's expectation was always incorrect (e.g., testing behavior that was never specified, or the test itself had a typo from day one).
+
+**Red flags that you're blaming the test incorrectly:**
+- "The test is outdated because we changed X" — if X was a refactor (same behavior, different structure), the test is right and your refactor broke something
+- "The test expects old behavior" — old behavior was correct unless the user explicitly requested a behavior change
+- "Let me update the test to match" — STOP. Why doesn't the code match the test? Answer that first.
 
 **NEVER:** change the test to match broken code. **NEVER:** retry the same fix with minor tweaks.
 

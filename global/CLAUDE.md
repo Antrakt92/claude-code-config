@@ -153,7 +153,7 @@ For every new function/endpoint before marking done: null/None inputs, empty col
 ## 5. Scope & Simplicity
 
 - **Follow existing patterns** — match naming, structure, error handling of adjacent code. Search entire codebase (not just utils/) for existing implementations before writing new logic.
-- **3+ rule**: Extract to utility only when pattern repeats 3+ times. Two occurrences = copy is OK.
+- **2+ rule for business logic, 3+ for generic utilities**: If the same business logic (access checks, validation rules, domain calculations) appears in 2+ places — extract immediately. These change together and divergence causes bugs. For generic/mechanical patterns (formatting, null checks), 3+ before extracting.
 - **Catch specific exceptions** — never bare `except:`. Log meaningful context. Fail loudly on unexpected errors.
 - **If you see a problem** while working — note it at end of response, don't fix unsolicited (unless security)
 

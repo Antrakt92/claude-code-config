@@ -215,7 +215,6 @@ CSV injection: escape `=`, `@`, `+`, `-` at cell start.
 ## 8. Self-Improvement
 
 When user corrects you: save to feedback memory. If general rule → add to CLAUDE.md.
-Maintain `memory/improvement-log.md` per-project.
 
 ---
 
@@ -229,6 +228,8 @@ These fire in EVERY project via `~/.claude/settings.json`. Don't duplicate in pr
 - **auto-lint-python.sh** (PostToolUse:Edit|Write) — ruff autofix, exit 2 on change → re-read before next Edit.
 - **auto-lint-typescript.sh** (PostToolUse:Edit|Write) — ESLint --fix on .ts/.tsx. Walks up directory tree for config. Same md5sum/exit 2 pattern. Skips if project-level `.claude/hooks/auto-lint-typescript.sh` exists.
 - **ripple-check.sh** (PostToolUse:Edit|Write) — extracts function/class/const names from edited file, greps codebase for usages. Non-blocking (exit 0), warns via stderr. <3s timeout, max 5 warnings.
+
+**Test utility:** `test-hooks.sh` — not a registered hook. Run `bash ~/.claude/hooks/test-hooks.sh` to validate all hook logic (command matching, Phase 2 diff analysis, double-fire prevention, bypass markers).
 
 Projects add own hooks in `.claude/settings.json` — both global and project hooks fire. Hooks with double-fire prevention (pre-commit-review, auto-lint-typescript) check for project-level overrides and skip automatically.
 

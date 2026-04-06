@@ -127,7 +127,7 @@ We cover **7 of 10** core capabilities. The 3 we don't have (anti-distillation, 
 
 ## Behavioral rules (CLAUDE.md)
 
-18 behavioral rules across 10 sections, applied to every project:
+20 behavioral rules across 10 sections, applied to every project:
 
 | Rule | What it prevents |
 |------|-----------------|
@@ -149,6 +149,8 @@ We cover **7 of 10** core capabilities. The 3 we don't have (anti-distillation, 
 | **Context Recovery Protocol** | "After compression: git diff, re-read files, check todos" — prevents stale edits |
 | **AI-Optimized Comments** | "Only WHY/WARNING/SYNC — delete WHAT docstrings, no CLAUDE.md duplication" — saves tokens on every file read |
 | **Side Findings** | "Auto-fix simple issues found while working, flag complex for separate session" — catches bugs without extra prompts |
+| **Task Complexity Assessment** | "Suggest planning mode for >3 file business logic changes" — prevents diving into complex tasks without a plan |
+| **Commit Granularity** | "One logical change = one commit, side fixes separate" — keeps history reviewable and revertable |
 
 Plus: autonomy guidelines, code style for AI readability, security rules, self-improvement protocol.
 

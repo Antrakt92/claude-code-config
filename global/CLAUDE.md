@@ -186,11 +186,11 @@ Needs separate session (complex):
 - **Follow existing patterns** — match naming, structure, error handling of adjacent code. Search entire codebase (not just utils/) for existing implementations before writing new logic.
 - **2+ rule for business logic, 3+ for generic utilities**: If the same business logic (access checks, validation rules, domain calculations) appears in 2+ places — extract immediately. These change together and divergence causes bugs. For generic/mechanical patterns (formatting, null checks), 3+ before extracting.
 - **Catch specific exceptions** — never bare `except:`. Log meaningful context. Fail loudly on unexpected errors.
-- **If you see a problem** while working — note it at end of response, don't fix unsolicited (unless security)
+- **If you see a problem** while working — act per Side Findings tiers (§4): simple → fix, complex → flag
 
 ### Bug Prioritization
-- **Fix immediately:** Security issues, incorrect calculations, crashes
-- **Note in ROADMAP/TODO:** Performance, code smell, minor UX
+- **Fix immediately:** Security issues, incorrect calculations, crashes, dead code, simple type fixes
+- **Flag for separate session:** Performance regressions, complex refactors, architectural concerns
 - **Ignore:** Style preferences, edge cases provably impossible given system invariants (not the same as skipping the Edge Case Checklist — that applies during writing)
 
 ---

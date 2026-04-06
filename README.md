@@ -6,7 +6,7 @@ Hardening framework for [Claude Code](https://docs.anthropic.com/en/docs/claude-
 
 You won't catch any of this — because you never read the code.
 
-**The solution:** 6 shell hooks and 16 behavioral rules that install into `~/.claude/` and work across all your projects. Every commit is quality-gated. Every destructive command is blocked. Every file edit triggers a ripple check.
+**The solution:** 6 shell hooks and 18 behavioral rules that install into `~/.claude/` and work across all your projects. Every commit is quality-gated. Every destructive command is blocked. Every file edit triggers a ripple check.
 
 <p align="center">
   <a href="assets/hero-v4.svg">
@@ -29,7 +29,7 @@ That's it. Next time Claude Code runs, it's a senior dev. Works on Windows (Git 
 Three layers working together:
 
 - **Automated enforcement** (hooks) — every commit must pass linters, tests, and diff analysis. Destructive commands blocked before execution.
-- **Behavioral rules** (CLAUDE.md) — "re-read the file before editing", "search ALL callers before changing a function", "stop after 3 failed attempts".
+- **Behavioral rules** (CLAUDE.md) — "re-read the file before editing", "search ALL callers before changing a function", "stop after 3 failed attempts", "fix simple issues you find along the way".
 - **Persistent learning** (memory) — AI logs mistakes and applies corrections in future sessions.
 
 Not a plugin. Plugins add new tools. **claude-senior** makes the AI better at using the tools it already has.
@@ -117,7 +117,7 @@ In March 2026, Claude Code's full source was accidentally leaked via an npm sour
 | **Ripple effect detection** | System prompt awareness of caller impact | `ripple-check.sh` — greps usages after every edit |
 | **Memory across sessions** | Persistent memory + unreleased "Dream" consolidation | `CLAUDE.md` + project memory files with improvement logs |
 | **Auto-formatting on edit** | Built-in formatters | `auto-lint-python.sh` + `auto-lint-typescript.sh` with forced re-read |
-| **Behavioral rules via system prompt** | 11-step prompt pipeline with layered instructions | `CLAUDE.md` with 16 rules injected every session |
+| **Behavioral rules via system prompt** | 11-step prompt pipeline with layered instructions | `CLAUDE.md` with 18 rules injected every session |
 | **Sub-agent parallelism** | Coordinator mode (multi-agent swarm) | Sub-Agent Decomposition Rule + prompt caching guidance |
 | **Anti-distillation** | Fake tool definitions as poison pills | — |
 | **Dream (memory consolidation)** | Background agent consolidates memory during idle time | — (waiting for public release) |
@@ -127,7 +127,7 @@ We cover **7 of 10** core capabilities. The 3 we don't have (anti-distillation, 
 
 ## Behavioral rules (CLAUDE.md)
 
-16 behavioral rules across 10 sections, applied to every project:
+18 behavioral rules across 10 sections, applied to every project:
 
 | Rule | What it prevents |
 |------|-----------------|
@@ -147,6 +147,8 @@ We cover **7 of 10** core capabilities. The 3 we don't have (anti-distillation, 
 | **Edge Case Checklist** | "Check null, empty, zero, boundary values WHILE writing" — prevents bugs found only in QA |
 | **Uncertainty Disclosure** | "If unsure, say so explicitly" — prevents false confidence |
 | **Context Recovery Protocol** | "After compression: git diff, re-read files, check todos" — prevents stale edits |
+| **AI-Optimized Comments** | "Only WHY/WARNING/SYNC — delete WHAT docstrings, no CLAUDE.md duplication" — saves tokens on every file read |
+| **Side Findings** | "Auto-fix simple issues found while working, flag complex for separate session" — catches bugs without extra prompts |
 
 Plus: autonomy guidelines, code style for AI readability, security rules, self-improvement protocol.
 

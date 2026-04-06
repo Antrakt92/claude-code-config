@@ -156,6 +156,31 @@ For every new function/endpoint before marking done: null/None inputs, empty col
 
 **WHY:** Pre-commit tests pass on new code because no tests exist yet. Serious bugs found in post-feature "find bugs" passes = this checklist was skipped during writing.
 
+### Side Findings (be a senior, not a task runner)
+While working on any task, notice and report issues found along the way — don't silently discard observations just because they're "not the current task". At the end of your response, add a `Side findings` block if you spotted anything actionable.
+
+**Report (at end of response, short block):**
+- Bugs: type errors, logic errors, runtime risks seen in diagnostics or code
+- Dead code: unused variables, unreachable branches, stale imports
+- Obvious simplifications: when already reading a file and see clear improvement
+- Missing tests: for code you're actively touching
+
+**Don't report (noise):**
+- Vague "could refactor" without specifics
+- Style/formatting opinions
+- Feature suggestions (product decisions, not dev scope)
+
+**Format:** terse, 1 line per finding, file:line, actionable:
+```
+---
+Side findings:
+- BUG: file.py:172 — X assigned to wrong type, needs cast
+- DEAD: parser.py:1145 — `fee_currency` never accessed
+- SIMPLIFY: helpers.py:30 — 3 identical blocks, extract helper
+```
+
+Don't fix side findings without asking — just surface them. User decides priority.
+
 ---
 
 ## 5. Scope & Simplicity

@@ -157,29 +157,27 @@ For every new function/endpoint before marking done: null/None inputs, empty col
 **WHY:** Pre-commit tests pass on new code because no tests exist yet. Serious bugs found in post-feature "find bugs" passes = this checklist was skipped during writing.
 
 ### Side Findings (be a senior, not a task runner)
-While working on any task, notice and report issues found along the way — don't silently discard observations just because they're "not the current task". At the end of your response, add a `Side findings` block if you spotted anything actionable.
+While working, notice issues along the way. Don't discard — act based on fix complexity.
 
-**Report (at end of response, short block):**
-- Bugs: type errors, logic errors, runtime risks seen in diagnostics or code
-- Dead code: unused variables, unreachable branches, stale imports
-- Obvious simplifications: when already reading a file and see clear improvement
-- Missing tests: for code you're actively touching
+**Simple fix (do it immediately):**
+Dead code, unused vars/imports, stale comments, type annotations, missing null checks, obvious 1-line bugs. Just fix. If >2 side fixes, batch in separate commit from main task.
 
-**Don't report (noise):**
-- Vague "could refactor" without specifics
-- Style/formatting opinions
-- Feature suggestions (product decisions, not dev scope)
+**Complex fix (flag for separate session):**
+Calculation logic, multi-file refactors, architecture issues, anything touching tax/financial formulas, anything where fix could break other things. Report at end of response with enough context for user to launch a dedicated planning-mode session.
 
-**Format:** terse, 1 line per finding, file:line, actionable:
+**Judge yourself:** Before auto-fixing, assess — "can I confidently fix this in 1-3 lines without reading 5 other files?" Yes → fix. No → flag.
+
+**Filter out:** ORM type checker noise (Pyright `Column[int]` vs `int` — not runtime bugs), vague "could refactor", style opinions.
+
+**Format at end of response:**
 ```
 ---
-Side findings:
-- BUG: file.py:172 — X assigned to wrong type, needs cast
-- DEAD: parser.py:1145 — `fee_currency` never accessed
-- SIMPLIFY: helpers.py:30 — 3 identical blocks, extract helper
+Side fixes applied:
+- Removed unused `fee_currency` in parser.py:1145
+- Added null guard before abs() in service.py:30
+Needs separate session (complex):
+- calculator.py:200 — loss offset may double-count in edge case X, needs planning mode
 ```
-
-Don't fix side findings without asking — just surface them. User decides priority.
 
 ---
 

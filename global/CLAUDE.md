@@ -188,21 +188,35 @@ Code is written by AI, for AI to read later. 100% AI-read, never human.
 
 **Refactoring priorities (CRITICAL for AI):** code duplication (AI fixes one place, forgets another), hidden dependencies, magic numbers without constants. Don't refactor just for "cleanliness" — only fix what causes AI errors.
 
-### Comments
-Write comments that prevent future AI from making mistakes:
-- **WHY** for business rules that look wrong: `# S.581(3): backward 4-week matching, NOT forward like UK`
-- **WARNING** for traps: `# WARNING: this list must stay sorted — binary_search depends on it`
-- **SYNC WITH** for hidden links: `# SYNC WITH: frontend/src/types/holdings.ts HoldingRow interface`
-- Don't comment WHAT (AI can read code) — only comment WHY and WATCH OUT
+### Comments (100% AI-read — optimize for tokens)
+
+**Three allowed comment types** (everything else = delete):
+- `# WHY:` — business rule that looks wrong: `# WHY: S.581(3) backward 4-week, NOT forward (UK)`
+- `# WARNING:` — invariant/trap: `# WARNING: must stay sorted — binary_search dep`
+- `# SYNC:` — hidden cross-file link: `# SYNC: frontend/src/types/holdings.ts HoldingRow`
+
+**No-duplication rule (CRITICAL):**
+- If a rule is in CLAUDE.md → NO inline comment repeating it (CLAUDE.md always in context = double token cost)
+- Inline comments = file-local traps ONLY (things CLAUDE.md can't cover)
+- Before writing a comment, ask: "is this already in CLAUDE.md?" If yes → skip
+
+**Kill low-value comments:**
+- Module/class/function docstrings describing WHAT → delete (AI reads code)
+- `# This service handles X` → delete
+- `# Returns: Y` → delete (type annotations say this)
+- `# TEMP: workaround for...` → fix or create issue, don't leave stale workarounds
+
+**Placement rule:** Comment on the line it protects, NOT in file-header blocks. Header block = tokens paid on every read even when irrelevant.
+
+**Style:** Telegraphic. Drop articles/filler. 1 line, max ~80 chars. >2 lines = compress.
 
 ### Infrastructure Code (bash, regex, hooks, configs)
 
-In bash/regex/hooks — every pattern and design decision MUST have a WHY comment:
-- **Regex**: what it matches, what it intentionally skips, known limitations
-- **Design choices**: why this approach over the obvious alternative (`exit 2` not `exit 1`, `|| true`, exclusions)
-- Without these, future AI will "fix" working regex without understanding the edge cases it handles
+Every design decision MUST have a WHY comment (future AI will "fix" working regex/bash without these):
+- **Regex**: what it matches, what it skips, known limits
+- **Design choices**: why this over the obvious alternative (`exit 2` not `exit 1`, `|| true`)
 
-**Comment density rule**: 1 WHY per design decision, not 1 WHY per line of code. If a comment explains how bash/language works — delete it. SYNC WITH tags go in the file header, not on every repeated line. A comment longer than the code it explains is a smell.
+**Density:** 1 WHY per decision, not per line. Language-explainer = delete. Comment longer than code = compress or remove.
 
 ---
 

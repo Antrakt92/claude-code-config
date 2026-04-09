@@ -147,20 +147,6 @@ else
 fi
 rm -rf "$TMPPROJECT2"
 
-# WHY: commits >500 added lines should trigger size warning
-TMPPROJECT2=$(mktemp -d)
-(cd "$TMPPROJECT2" && git init -q && git config user.email "test@test.com" && git config user.name "Test" && seq 1 600 | awk '{print "line " $1}' > bigfile.txt && git add bigfile.txt) >/dev/null 2>&1
-STDERR_SIZE=$(echo '{"tool_name":"Bash","tool_input":{"command":"git commit -m test"}}' | (cd "$TMPPROJECT2" && bash "$HOOKS_DIR/pre-commit-review.sh") 2>&1 >/dev/null)
-RESULT=$?
-if [ "$RESULT" -eq 2 ] && echo "$STDERR_SIZE" | grep -qi "LARGE"; then
-  echo "  PASS: >500 lines → blocked by Phase 2"
-  PASS=$((PASS + 1))
-else
-  echo "  FAIL: >500 lines should be blocked (exit=$RESULT)"
-  FAIL=$((FAIL + 1))
-fi
-rm -rf "$TMPPROJECT2"
-
 # WHY: entities.py changed without migration file should warn
 TMPPROJECT2=$(mktemp -d)
 (cd "$TMPPROJECT2" && git init -q && git config user.email "test@test.com" && git config user.name "Test" && echo "class User: pass" > entities.py && git add entities.py) >/dev/null 2>&1

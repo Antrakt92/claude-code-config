@@ -91,11 +91,7 @@ Approach fails 3 times → STOP. Re-read all files from scratch, re-read origina
 ### Test Failure Recovery
 1. Read FULL error message 2. Read test file 3. Read source file 4. Determine fault location 5. Then fix.
 
-**Default: code is wrong, not the test.** Previously passing tests = verified behavior. Refactor broke them = regression.
-
-**Red flags you're blaming the test wrong:** "test is outdated because we changed X" (if X was same-behavior refactor → test is right), "let me update test to match" (STOP — why doesn't code match?).
-
-**NEVER** change test to match broken code.
+**Default: code is wrong, not the test.** Passing→failing = regression in the refactor, not a stale test. Red flags you're wrong: "test is outdated because we changed X" (if same-behavior refactor → test is right), "let me update test to match" (STOP — why doesn't code match?). **NEVER** change a test to match broken code.
 
 ### Calculation Test Protection (CRITICAL)
 Tests with hardcoded real-world expected values (financial, tax, compliance) are **sources of truth** — verified against external references, MORE trustworthy than code.
@@ -111,7 +107,7 @@ Every new function/endpoint: null/None, empty collections, zero/negative, bounda
 ### Side Findings (be a senior, not a task runner)
 While working, notice issues along the way. Act based on fix complexity.
 
-**Simple (auto-fix):** dead code, unused vars/imports, stale comments, type annotations, missing null checks, obvious 1-line bugs. Batch >2 in separate commit.
+**Simple (auto-fix):** dead code, unused vars/imports, stale comments, type annotations, missing null checks, obvious 1-line bugs. Batch >2 in separate commit. **NOT auto-fixable (dead work in AI-only):** readability extractions, renames for clarity, function splits for "size" — see §6 Refactoring Decisions.
 
 **Complex (flag):** calculation logic, multi-file refactors, architecture, financial formulas. Report at end of response for user to launch planning-mode session.
 
@@ -132,7 +128,7 @@ Needs separate session (complex):
 ## 5. Scope & Simplicity
 
 - **Follow existing patterns** — match naming, structure, error handling. Search entire codebase for existing implementations before writing new logic.
-- **Extract rule:** business logic duplicated 2+ places → extract immediately. Generic utilities → 3+ before extracting.
+- **Extract rule:** business logic 3+ places → extract. At 2 places: extract ONLY if the extraction process revealed a bug (e.g., discovered double-call, wrong arg order, missing error handling). Generic utilities → 3+. Pure-readability extractions = dead work (see §6 Refactoring Decisions).
 - **Catch specific exceptions** — never bare `except:`. Log meaningful context. Fail loudly on unexpected errors.
 - **Side findings** — act per §4 tiers: simple → fix, complex → flag.
 
@@ -160,7 +156,32 @@ Code written by AI, for AI to read later. 100% AI-read, never human.
 
 **Update comments when changing code they describe.** Stale comment → future AI "fixes" working code to match wrong comment.
 
-**Refactoring priorities:** code duplication, hidden dependencies, magic numbers. Don't refactor just for "cleanliness" — only fix what causes AI errors.
+### Refactoring Decisions
+
+L3 is load-bearing: "user never reads code". "Readability" is not a valid refactor axis — inline and extracted versions parse identically for you. You cannot review the code you ship; tests are the only signal you didn't break anything.
+
+**Dead work — never do in self-directed refactoring:**
+- Helper extraction at 2 callsites that doesn't dedup anything or reveal a bug
+- Rename for "clarity" when the existing name is grep-ably unambiguous
+- Function split for "size" when parts cannot be unit-tested independently with different inputs
+- Reorder blocks for "flow"
+- Unmeasured "performance" refactors
+
+**Worth tokens — value hierarchy (highest first):**
+1. Tests (only guardrail)
+2. Bug fixes, including audit-discovered
+3. CLAUDE.md updates (ripple map, Error→Root Cause, Critical Patterns, new traps)
+4. Type annotations + named constants for 3+ repeated magic values (drift prevention)
+5. Dedup at 3+ callsites OR when extraction revealed a bug (see §5 Extract rule)
+6. Measured performance refactor with CLAUDE.md rationale update
+
+**Per-commit self-check (for commits that modify code):** does this commit add a test assertion, fix a bug, or add a substantive CLAUDE.md entry (new ripple map line, new error pattern, new trap — not a typo or date bump)? If no → dead work, stop. Investigation/planning sessions with no code commits are exempt.
+
+**Exceptions:**
+- Explicit user request overrides these defaults (§1 Instruction Priority)
+- Side findings (dead code, unused imports, stale comments): follow §4 Side Findings tiers
+- Initial code structure for new features: follow "Optimize for" rules above (not this subsection)
+- Breaking-change refactors (API rename, file move): exempt from 2-callsite rule, still need test verification per §3 Ripple Effect Rule
 
 ### Comments (100% AI-read — optimize for tokens)
 
@@ -195,22 +216,18 @@ When user corrects you: save to feedback memory. If general rule → add to CLAU
 
 ## 9. Global Hooks (`~/.claude/hooks/`)
 
-Fire in EVERY project via `~/.claude/settings.json`. Don't duplicate in project settings.
+Fire in EVERY project via `~/.claude/settings.json`. Projects detect global hooks via marker and skip to avoid double-fire.
 
-- **block-dangerous-git.sh** (PreToolUse:Bash) — blocks force push, reset --hard, checkout -f, clean -f, checkout/restore ., branch -D, stash drop/clear, rm -rf, alembic downgrade, .env writes. Per-operation marker bypass.
-- **block-protected-files.sh** (PreToolUse:Edit|Write) — blocks .env* (not .env.example) and lock files.
-- **pre-commit-review.sh** (PreToolUse:Bash) — Phase 1: auto-detect stack, run linters+tests. Phase 2: diff analysis (any types, empty catch, TODO/FIXME, missing migrations). Skips if project-level override exists.
-- **auto-lint-python.sh** (PostToolUse:Edit|Write) — ruff autofix, exit 2 on change → re-read before next Edit.
-- **auto-lint-typescript.sh** (PostToolUse:Edit|Write) — ESLint --fix on .ts/.tsx, same exit 2 pattern. Skips if project-level override exists.
-- **ripple-check.sh** (PostToolUse:Edit|Write) — greps codebase for definitions in edited file. Non-blocking, <3s timeout.
+| Event | Hook | Behavior |
+|-------|------|----------|
+| PreToolUse:Bash | `block-dangerous-git.sh` | Blocks force push, reset --hard, checkout -f, clean, rm -rf, alembic downgrade, .env writes. Per-op marker bypass |
+| PreToolUse:Edit\|Write | `block-protected-files.sh` | Blocks `.env*` (not `.env.example`) and lock files |
+| PreToolUse:Bash | `pre-commit-review.sh` | Auto-detect stack → lint+test → diff analysis (any types, TODO, missing migration). Skips on project override |
+| PostToolUse:Edit\|Write | `auto-lint-python.sh` / `-typescript.sh` | ruff/eslint `--fix`; exit 2 on change → re-read before next Edit |
+| PostToolUse:Edit\|Write | `ripple-check.sh` | Greps definitions in edited file; non-blocking <3s |
 
-**Test utility:** `bash ~/.claude/hooks/test-hooks.sh` validates all hook logic.
-
-Projects add hooks in `.claude/settings.json` — both global and project hooks fire. Double-fire prevention: globals detect project overrides and skip.
-
-### Config repo: github.com/Antrakt92/claude-senior
-
-Files in `~/.claude/` are **symlinks** to `~/Documents/GitHub/claude-senior/global/`. After changing:
+**Test:** `bash ~/.claude/hooks/test-hooks.sh`.
+**Config repo:** `github.com/Antrakt92/claude-senior`. Files in `~/.claude/` are symlinks — after editing, commit in the claude-senior repo:
 ```bash
 cd ~/Documents/GitHub/claude-senior && git add -A && git commit -m "update" && git push
 ```

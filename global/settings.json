@@ -1,5 +1,14 @@
 {
+  "cleanupPeriodDays": 30,
   "permissions": {
+    "allow": [
+      "Write(//c/Users/Dima/.claude/plans/**)",
+      "Edit(//c/Users/Dima/.claude/plans/**)",
+      "Write(C:\\Users\\Dima\\.claude\\plans\\**)",
+      "Edit(C:\\Users\\Dima\\.claude\\plans\\**)",
+      "Bash(gh issue *)",
+      "Bash(git push:*)"
+    ],
     "deny": [
       "Bash(rm -rf /)",
       "Bash(del /s /q C:*)",
@@ -10,7 +19,11 @@
       "Bash(pkill -9:*)",
       "Bash(chmod 777:*)"
     ],
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "bypassPermissions",
+    "additionalDirectories": [
+      "C:\\Users\\Dima",
+      "C:\\Users\\Dima\\.claude\\plans"
+    ]
   },
   "hooks": {
     "PreToolUse": [
@@ -68,9 +81,11 @@
     "claude-code-setup@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true
   },
-  "effortLevel": "max",
   "autoUpdatesChannel": "latest",
   "autoMemoryEnabled": true,
   "autoDreamEnabled": true,
-  "skipDangerousModePermissionPrompt": true
+  "showThinkingSummaries": true,
+  "skipDangerousModePermissionPrompt": true,
+  "useAutoModeDuringPlan": true,
+  "effortLevel": "max"
 }

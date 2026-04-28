@@ -7,7 +7,11 @@
       "Write(C:\\Users\\Dima\\.claude\\plans\\**)",
       "Edit(C:\\Users\\Dima\\.claude\\plans\\**)",
       "Bash(gh issue *)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git -C \"C:/Users/Dima/Documents/GitHub/StatsPro\" add StatsPro.lua CHANGELOG.md)",
+      "Bash(git -C \"C:/Users/Dima/Documents/GitHub/StatsPro\" commit -m \"Render Repair on dedicated single-line FontString aligned via measured line height\")",
+      "Bash(git -C \"C:/Users/Dima/Documents/GitHub/StatsPro\" status)",
+      "Bash(git -C \"C:/Users/Dima/Documents/GitHub/StatsPro\" log --oneline -3)"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -67,6 +71,24 @@
             "command": "bash ~/.claude/hooks/ripple-check.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/compress-pytest-output.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/log-hook-perf.sh"
+          }
+        ]
       }
     ]
   },
@@ -87,5 +109,10 @@
   "showThinkingSummaries": true,
   "skipDangerousModePermissionPrompt": true,
   "useAutoModeDuringPlan": true,
-  "effortLevel": "max"
+  "effortLevel": "max",
+  "tui": "fullscreen",
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/scripts/statusline.sh"
+  }
 }

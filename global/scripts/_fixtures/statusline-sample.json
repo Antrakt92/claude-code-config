@@ -1,0 +1,20 @@
+{
+  "model": {
+    "id": "claude-opus-4-7-20251101",
+    "display_name": "Opus 4.7",
+    "reasoning_effort": "max",
+    "thinking_enabled": true
+  },
+  "context_window": {
+    "used_percentage": 23,
+    "context_window_size": 1000000,
+    "total_input_tokens": 234000
+  },
+  "workspace": {
+    "current_dir": "/c/Users/Dima/Documents/GitHub/investments-calculator",
+    "project_dir": "/c/Users/Dima/Documents/GitHub/investments-calculator"
+  },
+  "cwd": "/c/Users/Dima/Documents/GitHub/investments-calculator",
+  "session_id": "fixture-session-001",
+  "version": "2.1.121"
+}

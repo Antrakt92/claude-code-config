@@ -1,0 +1,9 @@
+{
+  "tool_name": "Bash",
+  "tool_input": {"command": "pytest tests/ -v"},
+  "tool_response": {
+    "stdout": "============================= test session starts ==============================\nplatform linux -- Python 3.13.0, pytest-8.0.0, pluggy-1.5.0\ncollected 60 items\n\ntests/test_a.py ........                                                 [ 13%]\ntests/test_b.py ........                                                 [ 26%]\ntests/test_c.py ........                                                 [ 40%]\ntests/test_d.py ........                                                 [ 53%]\ntests/test_e.py ........                                                 [ 66%]\ntests/test_f.py ........                                                 [ 80%]\ntests/test_g.py ........                                                 [ 93%]\ntests/test_h.py ....                                                     [100%]\n\n============================== 60 passed in 1.23s ==============================\n",
+    "stderr": ""
+  },
+  "duration_ms": 1234
+}

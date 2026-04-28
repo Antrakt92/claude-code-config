@@ -99,7 +99,7 @@ Tests with hardcoded real-world expected values (financial, tax, compliance) are
 Refactoring breaks calc test → fix code, NOT test. Intentionally changing calc logic → MUST tell user: "Old expected: A. New: B. Reason: [specific change]." Silent test value updates in financial software = catastrophic.
 
 ### Regression Test First
-Bug fix: write failing test → confirm fails → fix → confirm passes.
+Bug fix: write failing test → confirm fails → fix → confirm passes. **One test per fix, same commit** — N bugs fixed = N regression tests. Bundled "fix N correctness bugs" commits without per-bug tests are the dominant gap-creator (audit-verified). Side findings auto-fixed under §4 are exempt only if they truly carry no behavior change (type annotations, dead-code removal); behavior fixes always need a test, no matter how small. "I'll add tests after" doesn't survive context compression.
 
 ### Edge Case Checklist (WHILE writing, not after)
 Every new function/endpoint: null/None, empty collections, zero/negative, boundary values, wrong user_id, FK delete order, nullable casts, concurrent requests.
@@ -225,6 +225,8 @@ Fire in EVERY project via `~/.claude/settings.json`. Projects detect global hook
 | PreToolUse:Bash | `pre-commit-review.sh` | Auto-detect stack → lint+test → diff analysis (any types, TODO, missing migration). Skips on project override |
 | PostToolUse:Edit\|Write | `auto-lint-python.sh` / `-typescript.sh` | ruff/eslint `--fix`; exit 2 on change → re-read before next Edit |
 | PostToolUse:Edit\|Write | `ripple-check.sh` | Greps definitions in edited file; non-blocking <3s |
+| PostToolUse:Bash | `compress-pytest-output.sh` | Section-aware pytest output compression. 3-layer fail-open: bash pre-filter, python command re-verify, FAILED/ERROR preservation check |
+| PostToolUse:* | `log-hook-perf.sh` | Logs `<ts> <tool> <duration_ms>` to `~/.claude/hook-perf.log`. Auto-rotates at 10MB |
 
 **Test:** `bash ~/.claude/hooks/test-hooks.sh`.
 **Config repo:** `github.com/Antrakt92/claude-senior`. Files in `~/.claude/` are symlinks — after editing, commit in the claude-senior repo:
@@ -237,3 +239,14 @@ cd ~/Documents/GitHub/claude-senior && git add -A && git commit -m "update" && g
 ## 10. End-of-Session
 
 Check: uncommitted changes, failing tests, partial tasks. Save handoff notes to memory if work is incomplete.
+
+---
+
+## 11. Performance instructions
+
+- Always read relevant files and gather context BEFORE making edits (research-first, not edit-first)
+- Never take shortcuts or apply "simplest fix" — analyze the root cause thoroughly
+- When working on complex tasks, break them into steps and explain your plan before executing
+- Do not stop mid-task — if you hit a problem, explain it and suggest alternatives instead of silently giving up
+- When editing code, verify your changes compile/pass tests before reporting completion
+- If a task requires reading many files, read them all — do not guess based on filenames

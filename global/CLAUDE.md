@@ -194,6 +194,20 @@ L3 is load-bearing: "user never reads code". "Readability" is not a valid refact
 
 **Kill:** WHAT-docstrings (AI reads code), `# Returns: Y` (types say this), `# This handles X`, stale workarounds.
 
+**Stale-prone patterns — scan against this BEFORE the comment leaves your fingers, AND on sight when reading existing code:**
+
+| Pattern | Why it rots | Write instead |
+|---------|-------------|---------------|
+| `-- see line 1234` / `per WHY-comment line N` | Lines drift after any edit | File + symbol: `see ApplyConfigFont`, `WHY-block above DefensiveHeader` |
+| Planning IDs in code: `(T2-4)`, `(P-7)`, `plan F-11`, "step 3" | Opaque to anyone outside the plan; plans get archived | Spell out the rule itself, drop the ID |
+| `-- X removed`, `-- replaces N call sites`, `-- moved into function Y` | Pure history, redundant with `git log` | Delete. State what IS, not what WAS |
+| Comment placeholder where a symbol used to live, pointing to its new home | Forwarding address that grep already finds | Delete the placeholder entirely |
+| Version tags outside migration code: `-- v1.1.4-era bug`, `-- v1.2.x default was OFF` | Session-tag noise; loses meaning fast | Timeless invariant. Version labels are load-bearing ONLY inside the migration clause that handles them |
+| Comment names a UI label (or external symbol) when the local variable has a different name | Either side can drift independently; grep on user-visible name finds nothing | Spell out both axes: `displayTab var (UI label "Appearance")` |
+| `-- (existing)`, `-- as before`, `-- still works`, `-- previously did X` | Meta-history that decays the day after | Delete or rewrite as the rule itself |
+
+**Recurring-drift defense:** when a comment names ANY drift-prone token (line number, planning ID, UI label, third-party symbol, file path), assume the named thing will move first and the comment second. Either anchor to a stable referent (function name, file:symbol pair) or don't write the reference at all.
+
 **Placement:** on the line it protects, not in header blocks. **Style:** telegraphic, 1 line, ~80 chars max.
 
 ### Infrastructure Code (bash, regex, hooks)
